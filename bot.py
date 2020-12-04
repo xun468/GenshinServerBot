@@ -18,7 +18,7 @@ def get_server(name, guild):
 	elif name == EMOJIS[':yellow_square:']:
 		role = discord.utils.get(guild.roles,name="Asia")
 	elif name == EMOJIS[':green_square:']:
-		role = discord.utils.get(guild.roles,name="SAR")
+		role = discord.utils.get(guild.roles,name="TW/HK/MO")
 	
 	return role 
 def get_WL(name, guild):
@@ -53,6 +53,7 @@ async def on_raw_reaction_add(payload):
 		guild_id = payload.guild_id
 		guild = discord.utils.find(lambda g : g.id == guild_id, client.guilds)
 		member = payload.member
+		role = None 
 		
 		if message_id == sever_msg_id:	
 			print(str(member) + " added server reaction")	
@@ -64,7 +65,7 @@ async def on_raw_reaction_add(payload):
 		if role is not None: 
 			if member is not None:
 				await member.add_roles(role)
-				print("added " + str(role) + " to " + str(member))
+				print(str(member) + " added " + str(role))
 			else: 
 				print("member not found")
 			
@@ -76,6 +77,7 @@ async def on_raw_reaction_remove(payload):
 	if message_id == sever_msg_id or wl_msg_id:
 		guild = await client.fetch_guild(payload.guild_id)
 		member = await guild.fetch_member(payload.user_id)
+		role = None 
 		
 		if message_id == sever_msg_id:	
 			print(str(member) + " removed server reaction")	
@@ -87,7 +89,7 @@ async def on_raw_reaction_remove(payload):
 		if role is not None: 
 			if member is not None:
 				await member.remove_roles(role)
-				print("removed " + str(role) + " from " + str(member))
+				print(str(member) + " removed " + str(role))
 			else: 
 				print("member not found")
 		
