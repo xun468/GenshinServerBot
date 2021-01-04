@@ -8,6 +8,7 @@ client = discord.Client(intents=intents)
 
 sever_msg_id = 	782664853784756234
 wl_msg_id = 782665043845840996
+vanity_msg_id = 795488467190153236
 
 def get_server(name, guild):
 	role = None
@@ -41,6 +42,19 @@ def get_WL(name, guild):
 		role = discord.utils.get(guild.roles,name="WL8")
 		
 	return role
+
+def get_vanity(name, guild):
+	role = None 
+	if name == "warhams":
+		role =  discord.utils.get(guild.roles,name="Ninggang")
+	elif name == "kaching":
+		role =  discord.utils.get(guild.roles,name="Kaching Mains")
+	elif name == "toys":
+		role =  discord.utils.get(guild.roles,name="Childe Chokeslam Squad")
+	elif name == "bennet":
+		role =  discord.utils.get(guild.roles,name="Benny's Adventure Group")
+
+	return role 
 	
 @client.event
 async def on_ready():
@@ -60,8 +74,11 @@ async def on_raw_reaction_add(payload):
 			role = get_server(payload.emoji.name, guild)
 		if message_id == wl_msg_id:
 			print(str(member) + " added WL reaction")
-			role = get_WL(payload.emoji.name, guild)
-			
+			role = get_WL(payload.emoji.name, guild)		
+		if message_id == vanity_msg_id:
+			print(str(member) + " added vanity reaction")
+			role = get_vanity(payload.emoji.name, guild)
+		 
 		if role is not None: 
 			if member is not None:
 				await member.add_roles(role)
@@ -85,6 +102,9 @@ async def on_raw_reaction_remove(payload):
 		if message_id == wl_msg_id:
 			print(str(member) + " removed WL reaction")
 			role = get_WL(payload.emoji.name, guild)
+		if message_id == vanity_msg_id:
+			print(str(member) + " removed vanity reaction")
+			role = get_vanity(payload.emoji.name, guild)
 			
 		if role is not None: 
 			if member is not None:
