@@ -46,13 +46,17 @@ def get_WL(name, guild):
 def get_vanity(name, guild):
 	role = None 
 	if name == "warhams":
-		role =  discord.utils.get(guild.roles,name="Ninggang")
+		role =  discord.utils.get(guild.roles,id = 795486023793639464)
 	elif name == "kaching":
-		role =  discord.utils.get(guild.roles,name="Kaching Mains")
+		role =  discord.utils.get(guild.roles,id = 795486061509345290)
 	elif name == "toys":
-		role =  discord.utils.get(guild.roles,name="Childe Chokeslam Squad")
+		role =  discord.utils.get(guild.roles,id = 795486103905763328)
 	elif name == "bennet":
-		role =  discord.utils.get(guild.roles,name="Benny's Adventure Group")
+		role =  discord.utils.get(guild.roles,id = 795486180166336542)
+	elif name == "cocogoat":
+		role =  discord.utils.get(guild.roles,id = 795492459051614240)
+	elif name == "booze":
+		role =  discord.utils.get(guild.roles,id = 795493682031493132)
 
 	return role 
 	
