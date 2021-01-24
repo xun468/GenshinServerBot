@@ -11,73 +11,65 @@ wl_msg_id = 782665043845840996
 vanity_msg_id = 795488467190153236
 pronoun_msg_id = 795491652017979472
 
+servers = {
+	EMOJIS[':red_square:']    : "NA",
+	EMOJIS[':blue_square:']   : "EU",
+	EMOJIS[':yellow_square:'] : "Asia",
+	EMOJIS[':green_square:']  : "TW/HK/MO"
+}
+
+WL = {
+	EMOJIS[':one:']   : "WL1",
+	EMOJIS[':two:']   : "WL2",
+	EMOJIS[':three:'] : "WL3",
+	EMOJIS[':four:']  : "WL4",
+	EMOJIS[':five:']  : "WL5",
+	EMOJIS[':six:']   : "WL6",
+	EMOJIS[':seven:'] : "WL7",
+	EMOJIS[':eight:'] : "WL8"
+}
+
+vanity = {
+	"warhams" : 795486023793639464,
+	"kaching" : 795486061509345290,
+	"toys"    : 795486103905763328,
+	"bennet"  : 795486180166336542,
+	"cocogoat": 795492459051614240,
+	"booze"   : 795493682031493132,
+	"allears" : 795793991684587600,
+	"thunk"   : 796365047604707388,
+	"broke"   : 802948687508668456	
+}
+
+pronouns = {
+	"venteee" : 802947991253549167,
+	"lazy"    : 802947995955757098,
+	"lumided" : 802947992780800022
+
+}
 def get_server(name, guild):
-	role = None
-	if name == EMOJIS[':red_square:']:
-		role = discord.utils.get(guild.roles,name="NA")
-	elif name == EMOJIS[':blue_square:']:
-		role = discord.utils.get(guild.roles,name="EU")
-	elif name == EMOJIS[':yellow_square:']:
-		role = discord.utils.get(guild.roles,name="Asia")
-	elif name == EMOJIS[':green_square:']:
-		role = discord.utils.get(guild.roles,name="TW/HK/MO")
+	if name in servers.keys():
+		return discord.utils.get(guild.roles,name=servers[name]), "server reaction" 
 	
-	return role, "server reaction" 
+	return None, "invalid server reaction" 
+
 def get_WL(name, guild):
-	role = None
-	if name == EMOJIS[':one:']:
-		role = discord.utils.get(guild.roles,name="WL1")
-	elif name == EMOJIS[':two:']:
-		role = discord.utils.get(guild.roles,name="WL2")
-	elif name == EMOJIS[':three:']:
-		role = discord.utils.get(guild.roles,name="WL3")
-	elif name == EMOJIS[':four:']:
-		role = discord.utils.get(guild.roles,name="WL4")
-	elif name == EMOJIS[':five:']:
-		role = discord.utils.get(guild.roles,name="WL5")
-	elif name == EMOJIS[':six:']:
-		role = discord.utils.get(guild.roles,name="WL6")
-	elif name == EMOJIS[':seven:']:
-		role = discord.utils.get(guild.roles,name="WL7")
-	elif name == EMOJIS[':eight:']:
-		role = discord.utils.get(guild.roles,name="WL8")
+	if name in WL.keys():
+		return discord.utils.get(guild.roles,name=WL[name]), "WL reaction"
 		
-	return role, "WL reaction"
+	return None, "Invalid WL reaction"
 
 def get_vanity(name, guild):
-	role = None 
-	if name == "warhams":
-		role =  discord.utils.get(guild.roles,id = 795486023793639464)
-	elif name == "kaching":
-		role =  discord.utils.get(guild.roles,id = 795486061509345290)
-	elif name == "toys":
-		role =  discord.utils.get(guild.roles,id = 795486103905763328)
-	elif name == "bennet":
-		role =  discord.utils.get(guild.roles,id = 795486180166336542)
-	elif name == "cocogoat":
-		role =  discord.utils.get(guild.roles,id = 795492459051614240)
-	elif name == "booze":
-		role =  discord.utils.get(guild.roles,id = 795493682031493132)
-	elif name == "allears":
-		role = discord.utils.get(guild.roles, id = 795793991684587600)
-	elif name == "thunk":
-		role = discord.utils.get(guild.roles, id = 796365047604707388)
-	elif name == "broke":
-		role = discord.utils.get(guild.roles, id = 802948687508668456)
+	if name in vanity.keys():
+		return discord.utils.get(guild.roles,id=vanity[name]), "vanity reaction"
 
-
-	return role, "vanity reaction"
+	return None, "invalid vanity reaction"
 
 def get_pronoun(name, guild):
-	role = None 
-	if name == "venteee":
-		role = discord.utils.get(guild.roles,id = 802947991253549167)
-	if name == "lazy":
-		role = discord.utils.get(guild.roles,id = 802947995955757098)
-	if name == "lumided":
-		role = discord.utils.get(guild.roles,id = 802947992780800022)
+	if name in pronouns.keys():
+		return discord.utils.get(guild.roles,id=pronouns[name]), "pronoun reaction"
 
-	return role, "pronoun reaction"
+	return None, "invalid pronoun reaction"
 	
 reaction_categories = {
 	sever_msg_id : get_server,
