@@ -98,7 +98,7 @@ async def on_raw_reaction_add(payload):
 		if message_id == vanity_msg_id:
 			print(str(member) + " added vanity reaction")
 			role = get_vanity(payload.emoji.name, guild)
-		if message_id == pronoun_msg_id
+		if message_id == pronoun_msg_id:
 			print(str(member) + " added pronoun reaction")
 			role = get_pronoun(payload.emoji.name, guild)
 		 
@@ -128,6 +128,9 @@ async def on_raw_reaction_remove(payload):
 		if message_id == vanity_msg_id:
 			print(str(member) + " removed vanity reaction")
 			role = get_vanity(payload.emoji.name, guild)
+		if message_id == pronoun_msg_id:
+			print(str(member) + " removed pronoun reaction")
+			role = get_pronoun(payload.emoji.name, guild)
 			
 		if role is not None: 
 			if member is not None:
