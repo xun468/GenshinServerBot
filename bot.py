@@ -9,6 +9,7 @@ client = discord.Client(intents=intents)
 sever_msg_id = 	782664853784756234
 wl_msg_id = 782665043845840996
 vanity_msg_id = 795488467190153236
+pronoun_msg_id = 795491652017979472
 
 def get_server(name, guild):
 	role = None
@@ -57,8 +58,23 @@ def get_vanity(name, guild):
 		role =  discord.utils.get(guild.roles,id = 795492459051614240)
 	elif name == "booze":
 		role =  discord.utils.get(guild.roles,id = 795493682031493132)
+	elif name == "allears":
+		role = discord.utils.get(guild.roles, id = 795793991684587600)
+	elif name == "thunk":
+		role = discord.utils.get(guild.roles, id = 796365047604707388)
 
-	return role 
+	return role
+
+def get_pronoun(name, guild):
+	role = None 
+	if name == "venteee":
+		role = discord.utils.get(guild.roles,id = 802947991253549167)
+	if name == "effort":
+		role = discord.utils.get(guild.roles,id = 802947995955757098)
+	if name == "lumided":
+		role = discord.utils.get(guild.roles,id = 802947992780800022)
+
+	return role
 	
 @client.event
 async def on_ready():
@@ -82,6 +98,9 @@ async def on_raw_reaction_add(payload):
 		if message_id == vanity_msg_id:
 			print(str(member) + " added vanity reaction")
 			role = get_vanity(payload.emoji.name, guild)
+		if message_id == pronoun_msg_id
+			print(str(member) + " added pronoun reaction")
+			role = get_pronoun(payload.emoji.name, guild)
 		 
 		if role is not None: 
 			if member is not None:
