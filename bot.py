@@ -22,7 +22,7 @@ def get_server(name, guild):
 	elif name == EMOJIS[':green_square:']:
 		role = discord.utils.get(guild.roles,name="TW/HK/MO")
 	
-	return role 
+	return role, "server reaction" 
 def get_WL(name, guild):
 	role = None
 	if name == EMOJIS[':one:']:
@@ -42,7 +42,7 @@ def get_WL(name, guild):
 	elif name == EMOJIS[':eight:']:
 		role = discord.utils.get(guild.roles,name="WL8")
 		
-	return role
+	return role, "WL reaction"
 
 def get_vanity(name, guild):
 	role = None 
@@ -62,20 +62,31 @@ def get_vanity(name, guild):
 		role = discord.utils.get(guild.roles, id = 795793991684587600)
 	elif name == "thunk":
 		role = discord.utils.get(guild.roles, id = 796365047604707388)
+	elif name == "broke":
+		role = discord.utils.get(guild.roles, id = 802948687508668456)
 
-	return role
+
+	return role, "vanity reaction"
 
 def get_pronoun(name, guild):
 	role = None 
 	if name == "venteee":
 		role = discord.utils.get(guild.roles,id = 802947991253549167)
-	if name == "effort":
+	if name == "lazy":
 		role = discord.utils.get(guild.roles,id = 802947995955757098)
 	if name == "lumided":
 		role = discord.utils.get(guild.roles,id = 802947992780800022)
 
-	return role
+	return role, "pronoun reaction"
 	
+reaction_categories = {
+	sever_msg_id : get_server,
+	wl_msg_id : get_WL,
+	vanity_msg_id : get_vanity,
+	pronoun_msg_id : get_pronoun
+}
+
+
 @client.event
 async def on_ready():
 	print("Katheryne Online") 
@@ -88,19 +99,13 @@ async def on_raw_reaction_add(payload):
 		guild = discord.utils.find(lambda g : g.id == guild_id, client.guilds)
 		member = payload.member
 		role = None 
+		member_str = str(member) + " added "
+		category = "invalid post"
 		
-		if message_id == sever_msg_id:	
-			print(str(member) + " added server reaction")	
-			role = get_server(payload.emoji.name, guild)
-		if message_id == wl_msg_id:
-			print(str(member) + " added WL reaction")
-			role = get_WL(payload.emoji.name, guild)		
-		if message_id == vanity_msg_id:
-			print(str(member) + " added vanity reaction")
-			role = get_vanity(payload.emoji.name, guild)
-		if message_id == pronoun_msg_id:
-			print(str(member) + " added pronoun reaction")
-			role = get_pronoun(payload.emoji.name, guild)
+		if message_id in reaction_categories.keys():
+			role, category = reaction_categories[message_id](payload.emoji.name, guild)	
+		
+		print(member_str + category)
 		 
 		if role is not None: 
 			if member is not None:
@@ -118,19 +123,14 @@ async def on_raw_reaction_remove(payload):
 		guild = await client.fetch_guild(payload.guild_id)
 		member = await guild.fetch_member(payload.user_id)
 		role = None 
+		member_str = str(member) + " removed "
+		category = "invalid post"
 		
-		if message_id == sever_msg_id:	
-			print(str(member) + " removed server reaction")	
-			role = get_server(payload.emoji.name, guild)
-		if message_id == wl_msg_id:
-			print(str(member) + " removed WL reaction")
-			role = get_WL(payload.emoji.name, guild)
-		if message_id == vanity_msg_id:
-			print(str(member) + " removed vanity reaction")
-			role = get_vanity(payload.emoji.name, guild)
-		if message_id == pronoun_msg_id:
-			print(str(member) + " removed pronoun reaction")
-			role = get_pronoun(payload.emoji.name, guild)
+		if message_id in reaction_categories.keys():
+			role, category = reaction_categories[message_id](payload.emoji.name, guild)	
+		
+		print(member_str + category)
+
 			
 		if role is not None: 
 			if member is not None:
