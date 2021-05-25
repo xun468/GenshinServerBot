@@ -10,23 +10,24 @@ sever_msg_id = 	782664853784756234
 wl_msg_id = 782665043845840996
 vanity_msg_id = 795488467190153236
 pronoun_msg_id = 795491652017979472
+command_msg_id = 807789677729808385
+housing_msg_id = 802955738267385906
 
 servers = {
 	EMOJIS[':red_square:']    : "NA",
 	EMOJIS[':blue_square:']   : "EU",
 	EMOJIS[':yellow_square:'] : "Asia",
-	EMOJIS[':green_square:']  : "TW/HK/MO"
 }
 
 WL = {
-	EMOJIS[':one:']   : "WL1",
-	EMOJIS[':two:']   : "WL2",
-	EMOJIS[':three:'] : "WL3",
-	EMOJIS[':four:']  : "WL4",
-	EMOJIS[':five:']  : "WL5",
-	EMOJIS[':six:']   : "WL6",
-	EMOJIS[':seven:'] : "WL7",
-	EMOJIS[':eight:'] : "WL8"
+	EMOJIS[':one:']   : "1-5",
+	EMOJIS[':two:']   : "1-5",
+	EMOJIS[':three:'] : "1-5",
+	EMOJIS[':four:']  : "1-5",
+	EMOJIS[':five:']  : "1-5",
+	EMOJIS[':six:']   : "6",
+	EMOJIS[':seven:'] : "7",
+	EMOJIS[':eight:'] : "8"
 }
 
 vanity = {
@@ -38,6 +39,7 @@ vanity = {
 	"booze"   : 795493682031493132,
 	"allears" : 795793991684587600,
 	"thunk"   : 796365047604707388,
+	EMOJIS[':knife:']   : 806554181175214080,
 	"broke"   : 802948687508668456	
 }
 
@@ -47,17 +49,41 @@ pronouns = {
 	"lumided" : 802947992780800022
 
 }
+
+WLS = ["WL8", "WL7", "WL6", "WL5", "WL4", "WL3", "WL2", "WL1"]
+server_names = ["NA", "EU", "Asia"]
+WL_server = ["EU1-5", "EU6" ,"EU7",	"EU8",
+			"NA1-5", "NA6", "NA7", "NA8",
+			"Asia1-5", "Asia6", "Asia7", "Asia8"]
+
+# https://stackoverflow.com/questions/65313107/python-google-sheets-api-searching-for-a-certain-string-and-returning-the-wh
+# def get_user(search):
+# 	#check search is UID or not server 
+# 	if isnumeric(search):
+# 		if(len(search) != 9):
+# 			return "Incorrect length for UID"
+# 		else: 
+			
+# 	return 
+
 def get_server(name, guild):
 	if name in servers.keys():
 		return discord.utils.get(guild.roles,name=servers[name]), "server reaction" 
 	
 	return None, "invalid server reaction" 
 
-def get_WL(name, guild):
+def get_WL(name, member, guild):
 	if name in WL.keys():
-		return discord.utils.get(guild.roles,name=WL[name]), "WL reaction"
+		roles = [y.name for y in member.roles]
+		for s in server_names: 
+			if s in roles: 
+				return discord.utils.get(guild.roles,name=s+WL[name]), "WL reaction"	
+		for s in WL_server: 
+			if s in roles:
+				return discord.utils.get(guild.roles,name=s), "WL reaction"	
+
 		
-	return None, "Invalid WL reaction"
+	return None, "invalid WL reaction"
 
 def get_vanity(name, guild):
 	if name in vanity.keys():
@@ -70,12 +96,23 @@ def get_pronoun(name, guild):
 		return discord.utils.get(guild.roles,id=pronouns[name]), "pronoun reaction"
 
 	return None, "invalid pronoun reaction"
+
+def get_housing(name, member, guild):
+	if (name == EMOJIS[':house:']):
+		roles = [y.name for y in member.roles]
+		for s in server_names: 
+			if s in roles: 
+				return discord.utils.get(guild.roles,name="Housing-"+s), "Housing reaction"	
+	return None, "invalid WL reaction"
+	
+
 	
 reaction_categories = {
 	sever_msg_id : get_server,
 	wl_msg_id : get_WL,
 	vanity_msg_id : get_vanity,
 	pronoun_msg_id : get_pronoun
+
 }
 
 
@@ -94,10 +131,24 @@ async def on_raw_reaction_add(payload):
 		member_str = str(member) + " added "
 		category = "invalid post"
 		
-		if message_id in reaction_categories.keys():
+		if message_id == wl_msg_id: 
+			role, category = get_WL(payload.emoji.name, member, guild)
+			print(member_str + category)
+		elif message_id == housing_msg_id: 
+			role, category = get_housing(payload.emoji.name, member, guild)
+			print(member_str + category)
+		elif message_id in reaction_categories.keys():
 			role, category = reaction_categories[message_id](payload.emoji.name, guild)	
-		
-		print(member_str + category)
+			print(member_str + category)
+		# elif message_id == command_msg_id:
+		# 	members = guild.members
+		# 	for m in members: 
+		# 		print(m.name)
+		# 		role = reassign_role(m, guild)
+		# 		if role != None: 
+		# 			await m.add_roles(role)
+			# category = "test" 	
+			
 		 
 		if role is not None: 
 			if member is not None:
@@ -118,10 +169,16 @@ async def on_raw_reaction_remove(payload):
 		member_str = str(member) + " removed "
 		category = "invalid post"
 		
-		if message_id in reaction_categories.keys():
+		if message_id == wl_msg_id: 
+			role, category = get_WL(payload.emoji.name, member, guild)
+			print(member_str + category)
+		elif message_id == housing_msg_id: 
+			role, category = get_housing(payload.emoji.name, member, guild)
+			print(member_str + category)
+		elif message_id in reaction_categories.keys():
 			role, category = reaction_categories[message_id](payload.emoji.name, guild)	
+			print(member_str + category)
 		
-		print(member_str + category)
 
 			
 		if role is not None: 
