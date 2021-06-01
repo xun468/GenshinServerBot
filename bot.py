@@ -5,7 +5,16 @@ from discord.ext import commands
 
 intents = discord.Intents.all()
 client = discord.Client(intents=intents)
+bot = commands.Bot(command_prefix='!')
 
+#Fanart management stuff 
+grandpapants = 487023958110109757
+xun = 161536840002830336
+seal = "bennet_thumbsup"
+fanart_source = 764590126420459530
+fanart_dest = 849138260374323210
+
+#Role react stuff
 sever_msg_id = 	782664853784756234
 wl_msg_id = 782665043845840996
 vanity_msg_id = 795488467190153236
@@ -122,6 +131,7 @@ async def on_ready():
 
 @client.event 
 async def on_raw_reaction_add(payload): 
+	#Role Reacts 
 	message_id = payload.message_id
 	if message_id == sever_msg_id or wl_msg_id:
 		guild_id = payload.guild_id
@@ -140,22 +150,37 @@ async def on_raw_reaction_add(payload):
 		elif message_id in reaction_categories.keys():
 			role, category = reaction_categories[message_id](payload.emoji.name, guild)	
 			print(member_str + category)
-		# elif message_id == command_msg_id:
-		# 	members = guild.members
-		# 	for m in members: 
-		# 		print(m.name)
-		# 		role = reassign_role(m, guild)
-		# 		if role != None: 
-		# 			await m.add_roles(role)
-			# category = "test" 	
-			
-		 
+
 		if role is not None: 
 			if member is not None:
 				await member.add_roles(role)
 				print(str(member) + " added " + str(role))
 			else: 
 				print("member not found")
+
+	#Fanart Curation 
+	channel = payload.channel_id	
+	if channel == fanart_source:
+		message_id = payload.message_id
+		msg = await client.get_channel(payload.channel_id).fetch_message(message_id)
+		#grandpapants 
+		if payload.member.id == grandpapants:
+			print("Grandpapants has added an image to the museum") 			
+			embed = msg.embeds[0]
+			await client.get_channel(fanart_dest).send(embed=embed)
+		#popular vote 
+		else:
+			seen = set()
+			for emote in msg.reactions:
+				users = await emote.users().flatten()
+				seen.update(users)
+			if len(seen) == 4 and msg.embeds:
+				print("Image has been voted into the museum") 	
+				embed = msg.embeds[0]
+				await client.get_channel(fanart_dest).send(embed=embed)
+
+
+
 			
 
 		
