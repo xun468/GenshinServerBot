@@ -298,11 +298,11 @@ async def goon(ctx, term = None):
 
 @client.command()
 async def unregister(ctx, uid = None):
-	if uid: 
-		values = sheet.findall(uid)		
-	else: 
-		user = str(ctx.author).lower()
-		values = sheet.findall(user)
+	# if uid: 
+	# 	values = sheet.findall(uid)		
+	# else: 
+	user = str(ctx.author).lower()
+	values = sheet.findall(user)
 	for r in values: 
 			sheet.delete_row(r.row)
 	return 
