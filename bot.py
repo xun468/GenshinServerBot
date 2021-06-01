@@ -220,11 +220,12 @@ async def on_raw_reaction_remove(payload):
 async def register(ctx, uid = None, server = None, wl = None):
 	user = ctx.author  
 	#automatic 
-	if uid and not server and len(uid) == 9: 		
+	if uid and len(uid) == 9: 		
 		#get roles 
 		all_roles = set([i.name for i in user.roles])
 		print(str(user) + " registering with " + str(all_roles))
-
+		user_s = str(user).lower()
+		nickname = user.display_name
 		server = list(all_roles.intersection(server_names))
 		if not server:
 			server = "Not Given"
@@ -243,23 +244,25 @@ async def register(ctx, uid = None, server = None, wl = None):
 			if wl == '5': 
 				wl = "1-5"
 	
-		cells = sheet.findall(str(user))
-		values = [str(user).lower(),uid,server,wl]
+		cells = sheet.findall(user_s)
+		values = [user_s, nickname, uid, server, wl]
 		#new registration
 		if len(cells) == 0: 
 			sheet.append_row(values)
 			await ctx.send("Goon registered!")
 		#updating
 		else:
-			r = str(sheet.find(str(user).lower()).row)
-			cell_list = sheet.range('A'+r+":D"+r)
+			r = str(sheet.find(user_s).row)
+			cell_list = sheet.range('A'+r+":E"+r)
 			for i, v in enumerate(values):
 				cell_list[i].value = v
 
 			sheet.update_cells(cell_list)
 			await ctx.send("Goon updated!")
-	else: 
+	elif uid and len(uid) != 9: 
 		await ctx.send("Registration failed, UID is not 9 digits long")
+	else: 
+		await ctx.send("Registration failed, command not formatted correctly")
 	# #manual 
 	# elif uid and len(uid) == 9 and server: 
 	# 	if not wl: 
@@ -281,20 +284,32 @@ async def goon(ctx, term = None):
 		values = sheet.findall(user)
 		if len(values) > 0: 
 			for r in values:   
-				await ctx.send(', '.join(sheet.row_values(r.row)))
+				row_values = sheet.row_values(r.row)
+				row_values[1] = "\"" + row_values[1] + "\""
+				await ctx.send(', '.join(row_values))
 		else: 
 			await ctx.send("You have not registered yet, you can do so using !register <insert UID here>")
 	else: 
 		#if user or UID
-		if re.match(r"^.{3,32}#[0-9]{4}$", term) or (len(term) == 9 and term.isnumeric):
-			values = sheet.findall(term.lower())
-			if len(values) > 0: 
-				for r in values:   
-					await ctx.send(', '.join(sheet.row_values(r.row)))
-			else: 
-				await ctx.send("Goon not found")
+		if re.match(r"^.{3,32}#[0-9]{4}$", term):
+			print("regex match " + term)
+			values = sheet.findall(term.lower())			
+		elif len(term) == 9 and term.isnumeric():
+			print("UID match " + term)
+			values = sheet.findall(term)
 		else: 
-			await ctx.send("I can only search for discord usernames or UIDs")
+			print("nick search " + term)
+			nick_column = sheet.range("B1:B{}".format(sheet.row_count))
+			values = [found for found in nick_column if term.lower() in found.value.lower()]				
+
+		if len(values) > 0: 
+			for r in values:   
+				row_values = sheet.row_values(r.row)
+				row_values[1] ="\"" + row_values[1] + "\""
+				await ctx.send(', '.join(row_values))
+		else: 
+			await ctx.send("Goon not found")
+
 
 @client.command()
 async def unregister(ctx, uid = None):
