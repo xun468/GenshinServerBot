@@ -73,8 +73,7 @@ WL_server = ["EU1-5", "EU6" ,"EU7",	"EU8",
 
 def get_server(name, guild):
 	if name in servers.keys():
-		return discord.utils.get(guild.roles,name=servers[name]), "server reaction" 
-	
+		return discord.utils.get(guild.roles,name=servers[name]), "server reaction" 	
 	return None, "invalid server reaction" 
 
 def get_WL(name, member, guild):
@@ -85,21 +84,17 @@ def get_WL(name, member, guild):
 				return discord.utils.get(guild.roles,name=s+WL[name]), "WL reaction"	
 		for s in WL_server: 
 			if s in roles:
-				return discord.utils.get(guild.roles,name=s), "WL reaction"	
-
-		
+				return discord.utils.get(guild.roles,name=s), "WL reaction"			
 	return None, "invalid WL reaction"
 
 def get_vanity(name, guild):
 	if name in vanity.keys():
 		return discord.utils.get(guild.roles,id=vanity[name]), "vanity reaction"
-
 	return None, "invalid vanity reaction"
 
 def get_pronoun(name, guild):
 	if name in pronouns.keys():
 		return discord.utils.get(guild.roles,id=pronouns[name]), "pronoun reaction"
-
 	return None, "invalid pronoun reaction"
 
 def get_housing(name, member, guild):
@@ -108,18 +103,14 @@ def get_housing(name, member, guild):
 		for s in server_names: 
 			if s in roles: 
 				return discord.utils.get(guild.roles,name="Housing-"+s), "Housing reaction"	
-	return None, "invalid WL reaction"
-	
-
+	return None, "invalid WL reaction"	
 	
 reaction_categories = {
 	sever_msg_id : get_server,
 	wl_msg_id : get_WL,
 	vanity_msg_id : get_vanity,
 	pronoun_msg_id : get_pronoun
-
 }
-
 
 @client.event
 async def on_ready():
@@ -166,8 +157,7 @@ async def on_raw_reaction_add(payload):
 			await client.get_channel(fanart_dest).send(embed=embed)
 		#popular vote 
 		else:
-			seen = set()
-			
+			seen = set()			
 			for emote in msg.reactions:
 				users = await emote.users().flatten()
 				seen.update(users)
@@ -180,11 +170,6 @@ async def on_raw_reaction_add(payload):
 					await client.get_channel(fanart_dest).send(embed=embed)
 					with open('MuseumIDs.txt', "a") as f:
 						f.write(str(message_id)+"\n")
-
-
-
-			
-
 		
 @client.event 
 async def on_raw_reaction_remove(payload): 
@@ -205,8 +190,6 @@ async def on_raw_reaction_remove(payload):
 		elif message_id in reaction_categories.keys():
 			role, category = reaction_categories[message_id](payload.emoji.name, guild)	
 			print(member_str + category)
-		
-
 			
 		if role is not None: 
 			if member is not None:
@@ -214,13 +197,12 @@ async def on_raw_reaction_remove(payload):
 				print(str(member) + " removed " + str(role))
 			else: 
 				print("member not found")
-# https://stackoverflow.com/questions/65313107/python-google-sheets-api-searching-for-a-certain-string-and-returning-the-wh
 
 @client.command()
 async def register(ctx, uid = None, server = None, wl = None):
 	user = ctx.author  
 	#automatic 
-	if uid and len(uid) == 9: 		
+	if uid and len(uid) == 9 and uid.isnumeric(): 		
 		#get roles 
 		all_roles = set([i.name for i in user.roles])
 		print(str(user) + " registering with " + str(all_roles))
@@ -259,10 +241,10 @@ async def register(ctx, uid = None, server = None, wl = None):
 
 			sheet.update_cells(cell_list)
 			await ctx.send("Goon updated!")
-	elif uid and len(uid) != 9: 
-		await ctx.send("Registration failed, UID is not 9 digits long")
+	elif uid: 
+		await ctx.send("Registration failed, UID is not 9 digits")
 	else: 
-		await ctx.send("Registration failed, command not formatted correctly")
+		await ctx.send("Registration failed, did not get UID")
 	# #manual 
 	# elif uid and len(uid) == 9 and server: 
 	# 	if not wl: 
@@ -273,8 +255,6 @@ async def register(ctx, uid = None, server = None, wl = None):
 	# 		sheet.append_row(values)
 	# 	else: 
 	# 		r = str(sheet.find(str(uid)).row)
-
-
 
 
 @client.command()
@@ -290,13 +270,15 @@ async def goon(ctx, term = None):
 		else: 
 			await ctx.send("You have not registered yet, you can do so using !register <insert UID here>")
 	else: 
-		#if user or UID
+		#if user
 		if re.match(r"^.{3,32}#[0-9]{4}$", term):
 			print("regex match " + term)
-			values = sheet.findall(term.lower())			
+			values = sheet.findall(term.lower())	
+		#if UID		
 		elif len(term) == 9 and term.isnumeric():
 			print("UID match " + term)
 			values = sheet.findall(term)
+		#nickname
 		else: 
 			print("nick search " + term)
 			nick_column = sheet.range("B1:B{}".format(sheet.row_count))
