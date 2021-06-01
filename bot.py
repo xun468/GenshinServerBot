@@ -2,10 +2,16 @@ import config
 import discord
 from emoji import EMOJI_ALIAS_UNICODE as EMOJIS
 from discord.ext import commands 
+import gspread
+import re 
 
 intents = discord.Intents.all()
-client = discord.Client(intents=intents)
-bot = commands.Bot(command_prefix='!')
+client = commands.Bot(command_prefix="!")
+
+#SPREAADSHEETSS 
+gc = gspread.service_account(filename="service_account.json")
+sheet = gc.open_by_key('1E9KJhGEjgST2KdPBDy0UcO2KvYRq4YXjtTJmctCGvwQ').sheet1
+
 
 #Fanart management stuff 
 grandpapants = 487023958110109757
@@ -64,16 +70,6 @@ server_names = ["NA", "EU", "Asia"]
 WL_server = ["EU1-5", "EU6" ,"EU7",	"EU8",
 			"NA1-5", "NA6", "NA7", "NA8",
 			"Asia1-5", "Asia6", "Asia7", "Asia8"]
-
-# https://stackoverflow.com/questions/65313107/python-google-sheets-api-searching-for-a-certain-string-and-returning-the-wh
-# def get_user(search):
-# 	#check search is UID or not server 
-# 	if isnumeric(search):
-# 		if(len(search) != 9):
-# 			return "Incorrect length for UID"
-# 		else: 
-			
-# 	return 
 
 def get_server(name, guild):
 	if name in servers.keys():
@@ -171,13 +167,19 @@ async def on_raw_reaction_add(payload):
 		#popular vote 
 		else:
 			seen = set()
+			
 			for emote in msg.reactions:
 				users = await emote.users().flatten()
 				seen.update(users)
 			if len(seen) == 4 and msg.embeds:
-				print("Image has been voted into the museum") 	
-				embed = msg.embeds[0]
-				await client.get_channel(fanart_dest).send(embed=embed)
+				with open('MuseumIDs.txt') as f:
+						lines = [line.rstrip() for line in f]
+				if str(message_id) not in lines:
+					print("Image has been voted into the museum") 	
+					embed = msg.embeds[0]
+					await client.get_channel(fanart_dest).send(embed=embed)
+					with open('MuseumIDs.txt', "a") as f:
+						f.write(str(message_id)+"\n")
 
 
 
@@ -212,5 +214,97 @@ async def on_raw_reaction_remove(payload):
 				print(str(member) + " removed " + str(role))
 			else: 
 				print("member not found")
-		
+# https://stackoverflow.com/questions/65313107/python-google-sheets-api-searching-for-a-certain-string-and-returning-the-wh
+
+@client.command()
+async def register(ctx, uid = None, server = None, wl = None):
+	user = ctx.author  
+	#automatic 
+	if uid and not server and len(uid) == 9: 		
+		#get roles 
+		all_roles = set([i.name for i in user.roles])
+		print(str(user) + " registering with " + str(all_roles))
+
+		server = list(all_roles.intersection(server_names))
+		if not server:
+			server = "Not Given"
+		else:
+			server = server[0]
+
+		wls = list(all_roles.intersection(WL_server))
+		wl = '0'
+
+		if not wls: 
+			wl = "Not given"
+		else: 
+			for r in wls: 
+				if(int(r[-1]) > int(wl)):
+					wl = r[-1]
+			if wl == '5': 
+				wl = "1-5"
+	
+		cells = sheet.findall(str(user))
+		values = [str(user).lower(),uid,server,wl]
+		#new registration
+		if len(cells) == 0: 
+			sheet.append_row(values)
+			await ctx.send("Goon registered!")
+		#updating
+		else:
+			r = str(sheet.find(str(user).lower()).row)
+			cell_list = sheet.range('A'+r+":D"+r)
+			for i, v in enumerate(values):
+				cell_list[i].value = v
+
+			sheet.update_cells(cell_list)
+			await ctx.send("Goon updated!")
+	else: 
+		await ctx.send("Registration failed, UID is not 9 digits long")
+	# #manual 
+	# elif uid and len(uid) == 9 and server: 
+	# 	if not wl: 
+	# 		wl = "Not Given"
+	# 	cells = sheet.findall(str(uid))
+	# 	values = [str(user), uid, server, wl]
+	# 	if len(cells) == 0
+	# 		sheet.append_row(values)
+	# 	else: 
+	# 		r = str(sheet.find(str(uid)).row)
+
+
+
+
+@client.command()
+async def goon(ctx, term = None):
+	if term == None: 
+		user = str(ctx.author).lower()
+		values = sheet.findall(user)
+		if len(values) > 0: 
+			for r in values:   
+				await ctx.send(', '.join(sheet.row_values(r.row)))
+		else: 
+			await ctx.send("You have not registered yet, you can do so using !register <insert UID here>")
+	else: 
+		#if user or UID
+		if re.match(r"^.{3,32}#[0-9]{4}$", term) or (len(term) == 9 and term.isnumeric):
+			values = sheet.findall(term.lower())
+			if len(values) > 0: 
+				for r in values:   
+					await ctx.send(', '.join(sheet.row_values(r.row)))
+			else: 
+				await ctx.send("Goon not found")
+		else: 
+			await ctx.send("I can only search for discord usernames or UIDs")
+
+@client.command()
+async def unregister(ctx, uid = None):
+	if uid: 
+		values = sheet.findall(uid)		
+	else: 
+		user = str(ctx.author).lower()
+		values = sheet.findall(user)
+	for r in values: 
+			sheet.delete_row(r.row)
+	return 
+
 client.run(config.bot_key)
