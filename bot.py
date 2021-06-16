@@ -1,17 +1,18 @@
 import config
 import discord
 from emoji import EMOJI_ALIAS_UNICODE as EMOJIS
-from discord.ext import commands 
+from discord.ext import commands
+from discord.ext.tasks import loop
+from discord.utils import get
 import gspread
 import re 
+from datetime import datetime, timedelta
+import pickle
 
 intents = discord.Intents.all()
 client = commands.Bot(command_prefix="!")
-
 #SPREAADSHEETSS 
 gc = gspread.service_account(filename="service_account.json")
-sheet = gc.open_by_key('1E9KJhGEjgST2KdPBDy0UcO2KvYRq4YXjtTJmctCGvwQ').sheet1
-
 
 #Fanart management stuff 
 grandpapants = 487023958110109757
@@ -159,15 +160,38 @@ async def on_raw_reaction_add(payload):
 		else:
 			seen = set()			
 			for emote in msg.reactions:
-				users = await emote.users().flatten()
-				seen.update(users)
-			if len(seen) == 4 and msg.embeds:
+				async for user in emote.users():
+					seen.add(user)
+
+			print(len(seen))		
+			if len(seen) >= 4 and msg.embeds:
+				print("in embeds")				
 				with open('MuseumIDs.txt') as f:
 						lines = [line.rstrip() for line in f]
 				if str(message_id) not in lines:
 					print("Image has been voted into the museum") 	
 					embed = msg.embeds[0]
 					await client.get_channel(fanart_dest).send(embed=embed)
+					with open('MuseumIDs.txt', "a") as f:
+						f.write(str(message_id)+"\n")
+			elif len(seen) >= 4 and msg.attachments:	
+				print("in attachments")			
+				with open('MuseumIDs.txt') as f:
+						lines = [line.rstrip() for line in f]
+				if str(message_id) not in lines:
+					print("Image has been voted into the museum") 	
+					embed = msg.attachments[0].url
+					await client.get_channel(fanart_dest).send(embed)
+					with open('MuseumIDs.txt', "a") as f:
+						f.write(str(message_id)+"\n")
+			elif len(seen) >= 4 and "twitter.com" in msg.content:	
+				print("in twitter")	
+				with open('MuseumIDs.txt') as f:
+						lines = [line.rstrip() for line in f]
+				if str(message_id) not in lines:
+					print("Image has been voted into the museum") 	
+					embed = msg.attachments[0].url
+					await client.get_channel(fanart_dest).send(embed)
 					with open('MuseumIDs.txt', "a") as f:
 						f.write(str(message_id)+"\n")
 		
@@ -200,14 +224,17 @@ async def on_raw_reaction_remove(payload):
 
 @client.command()
 async def register(ctx, uid = None, server = None, wl = None):
+	sheet = gc.open_by_key('1E9KJhGEjgST2KdPBDy0UcO2KvYRq4YXjtTJmctCGvwQ').sheet1
 	user = ctx.author  
 	#automatic 
 	if uid and len(uid) == 9 and uid.isnumeric(): 		
 		#get roles 
 		all_roles = set([i.name for i in user.roles])
 		print(str(user) + " registering with " + str(all_roles))
+
 		user_s = str(user).lower()
 		nickname = user.display_name
+
 		server = list(all_roles.intersection(server_names))
 		if not server:
 			server = "Not Given"
@@ -216,7 +243,6 @@ async def register(ctx, uid = None, server = None, wl = None):
 
 		wls = list(all_roles.intersection(WL_server))
 		wl = '0'
-
 		if not wls: 
 			wl = "Not given"
 		else: 
@@ -226,6 +252,7 @@ async def register(ctx, uid = None, server = None, wl = None):
 			if wl == '5': 
 				wl = "1-5"
 	
+		#updating sheet
 		cells = sheet.findall(user_s)
 		values = [user_s, nickname, uid, server, wl]
 		#new registration
@@ -238,7 +265,6 @@ async def register(ctx, uid = None, server = None, wl = None):
 			cell_list = sheet.range('A'+r+":E"+r)
 			for i, v in enumerate(values):
 				cell_list[i].value = v
-
 			sheet.update_cells(cell_list)
 			await ctx.send("Goon updated!")
 	elif uid: 
@@ -259,6 +285,8 @@ async def register(ctx, uid = None, server = None, wl = None):
 
 @client.command()
 async def goon(ctx, term = None):
+	sheet = gc.open_by_key('1E9KJhGEjgST2KdPBDy0UcO2KvYRq4YXjtTJmctCGvwQ').sheet1
+	#get self
 	if term == None: 
 		user = str(ctx.author).lower()
 		values = sheet.findall(user)
@@ -269,6 +297,7 @@ async def goon(ctx, term = None):
 				await ctx.send(', '.join(row_values))
 		else: 
 			await ctx.send("You have not registered yet, you can do so using !register <insert UID here>")
+	#search
 	else: 
 		#if user
 		if re.match(r"^.{3,32}#[0-9]{4}$", term):
@@ -282,19 +311,22 @@ async def goon(ctx, term = None):
 		else: 
 			print("nick search " + term)
 			nick_column = sheet.range("B1:B{}".format(sheet.row_count))
+			print(sheet.row_count)
 			values = [found for found in nick_column if term.lower() in found.value.lower()]				
 
 		if len(values) > 0: 
+			print("goon found")
 			for r in values:   
 				row_values = sheet.row_values(r.row)
 				row_values[1] ="\"" + row_values[1] + "\""
 				await ctx.send(', '.join(row_values))
 		else: 
+			print("goon not found")
 			await ctx.send("Goon not found")
-
 
 @client.command()
 async def unregister(ctx, uid = None):
+	sheet = gc.open_by_key('1E9KJhGEjgST2KdPBDy0UcO2KvYRq4YXjtTJmctCGvwQ').sheet1
 	# if uid: 
 	# 	values = sheet.findall(uid)		
 	# else: 
@@ -304,4 +336,65 @@ async def unregister(ctx, uid = None):
 			sheet.delete_row(r.row)
 	return 
 
+@loop(seconds=1800)
+async def countdown():
+	print("Checking banned list")
+	try:
+		ban_list = pickle.load(open("ban_list", 'rb'))
+		day_list = pickle.load(open("day_list", 'rb'))
+
+		now = datetime.now()
+		to_remove = [] 
+
+		for i in range(len(ban_list)):
+			if(now > day_list[i]):
+				print(ban_list[i])
+
+				guild = await client.fetch_guild(763498760537767956)
+				member = await guild.fetch_member(ban_list[i])
+				print(str(member))
+
+				if member:
+					print("checking " + str(member))
+					await member.remove_roles(discord.utils.get(guild.roles,id=854734771321569290))
+					channel = await client.fetch_channel(782784858471792641)
+					to_remove.append(i)
+					await channel.send("Unprobed " + str(member))
+
+		for i in to_remove: 
+			del ban_list[i]
+			del day_list[i]
+
+		pickle.dump(ban_list, open("ban_list", "wb"))
+		pickle.dump(day_list, open("day_list", "wb"))
+
+	except(OSError, IOError) as e:
+		print("No ban list found")
+
+
+@client.command(pass_context = True)
+async def probe(ctx,member:discord.Member, days = 1, hours = 0):
+	if ctx.message.author.id == grandpapants or ctx.message.author.id == xun:
+		guild = ctx.guild
+		await member.add_roles(discord.utils.get(guild.roles,id=854734771321569290))
+		await ctx.send('User probed for **' + str(days) + ' day(s)** and **' + str(hours) + ' hour(s)**')
+		print("probed " + str(member) + " for " + str(days) + " days and " + str(hours) + " hours")
+
+		try: 
+			ban_list = pickle.load(open("ban_list", 'rb'))
+			day_list = pickle.load(open("day_list", 'rb'))
+		except (OSError, IOError) as e:
+			ban_list = []
+			day_list = [] 
+
+		ban_list.append(member.id)
+		day_list.append(datetime.now() + timedelta(days=days, hours = hours))
+
+
+		pickle.dump(ban_list, open("ban_list", "wb"))
+		pickle.dump(day_list, open("day_list", "wb"))
+
+	else: 
+		await ctx.send("Thank you for volunteering for mod duty. Please report to Grandpapants as soon as possible")
+countdown.start()
 client.run(config.bot_key)
