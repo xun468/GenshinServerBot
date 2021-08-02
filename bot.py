@@ -56,7 +56,10 @@ vanity = {
 	"allears" : 795793991684587600,
 	"thunk"   : 796365047604707388,
 	EMOJIS[':knife:']   : 806554181175214080,
-	"broke"   : 802948687508668456	
+	"broke"   : 802948687508668456,
+	EMOJIS[':ghost:'] : 865381880232280065,
+	"vengeance" : 865381256027963433
+
 }
 
 pronouns = {
@@ -336,7 +339,7 @@ async def unregister(ctx, uid = None):
 			sheet.delete_row(r.row)
 	return 
 
-@loop(seconds=1800)
+@loop(minutes=60.0)
 async def countdown():
 	print("Checking banned list")
 	try:
@@ -351,8 +354,11 @@ async def countdown():
 				print(ban_list[i])
 
 				guild = await client.fetch_guild(763498760537767956)
-				member = await guild.fetch_member(ban_list[i])
-				print(str(member))
+
+				try: 
+					member = await guild.fetch_member(ban_list[i])
+				except: 
+					member = False 
 
 				if member:
 					print("checking " + str(member))
