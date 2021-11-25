@@ -1,6 +1,6 @@
 import config
 import discord
-from emoji import EMOJI_ALIAS_UNICODE as EMOJIS
+from emoji.unicode_codes import EMOJI_ALIAS_UNICODE_ENGLISH as EMOJIS 
 from discord.ext import commands
 from discord.ext.tasks import loop
 from discord.utils import get
@@ -8,6 +8,7 @@ import gspread
 import re 
 from datetime import datetime, timedelta
 import pickle
+
 
 intents = discord.Intents.all()
 client = commands.Bot(command_prefix="!")
@@ -28,6 +29,10 @@ vanity_msg_id = 795488467190153236
 pronoun_msg_id = 795491652017979472
 command_msg_id = 807789677729808385
 housing_msg_id = 802955738267385906
+
+#leaks channels 
+leaks_channel = 913137663400374312
+leaks_discussion = 777083973984976946
 
 servers = {
 	EMOJIS[':red_square:']    : "NA",
@@ -166,8 +171,18 @@ async def on_raw_reaction_add(payload):
 				async for user in emote.users():
 					seen.add(user)
 
-			print(len(seen))		
-			if len(seen) >= 4 and msg.embeds:
+			print(len(seen))
+			if len(seen) >= 4 and "twitter.com" in msg.content:	
+				print("in twitter")	
+				with open('MuseumIDs.txt') as f:
+						lines = [line.rstrip() for line in f]
+				if str(message_id) not in lines:
+					print("Image has been voted into the museum") 	
+					embed = msg.content
+					await client.get_channel(fanart_dest).send(embed)
+					with open('MuseumIDs.txt', "a") as f:
+						f.write(str(message_id)+"\n")		
+			elif len(seen) >= 4 and msg.embeds:
 				print("in embeds")				
 				with open('MuseumIDs.txt') as f:
 						lines = [line.rstrip() for line in f]
@@ -187,16 +202,7 @@ async def on_raw_reaction_add(payload):
 					await client.get_channel(fanart_dest).send(embed)
 					with open('MuseumIDs.txt', "a") as f:
 						f.write(str(message_id)+"\n")
-			elif len(seen) >= 4 and "twitter.com" in msg.content:	
-				print("in twitter")	
-				with open('MuseumIDs.txt') as f:
-						lines = [line.rstrip() for line in f]
-				if str(message_id) not in lines:
-					print("Image has been voted into the museum") 	
-					embed = msg.attachments[0].url
-					await client.get_channel(fanart_dest).send(embed)
-					with open('MuseumIDs.txt', "a") as f:
-						f.write(str(message_id)+"\n")
+
 		
 @client.event 
 async def on_raw_reaction_remove(payload): 
@@ -224,6 +230,29 @@ async def on_raw_reaction_remove(payload):
 				print(str(member) + " removed " + str(role))
 			else: 
 				print("member not found")
+
+@client.event
+async def on_message(message):
+    channel = message.channel
+
+    if channel.id == leaks_channel:
+    	print("leak detected")
+
+    	if len(message.content) != 0: 
+    		await client.get_channel(leaks_discussion).send(message.content)
+
+    	if len(message.embeds) > 0: 
+    		for e in message.embeds: 
+    			await client.get_channel(leaks_discussion).send(e)
+
+    	if len(message.attachments) > 0:
+    		for a in message.attachments: 
+    			if a.is_spoiler():
+    				a.filename = f"SPOILER_{a.filename}"
+    				a = await a.to_file()
+    				await client.get_channel(leaks_discussion).send(file=a)
+    			else:
+    				await client.get_channel(leaks_discussion).send(a)
 
 @client.command()
 async def register(ctx, uid = None, server = None, wl = None):
