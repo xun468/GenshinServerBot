@@ -159,47 +159,41 @@ async def on_raw_reaction_add(payload):
 	if channel == fanart_source:
 		message_id = payload.message_id
 		msg = await client.get_channel(payload.channel_id).fetch_message(message_id)
-		#grandpapants 
-		if payload.member.id == grandpapants:
-			print("Grandpapants has added an image to the museum") 			
-			embed = msg.embeds[0]
-			await client.get_channel(fanart_dest).send(embed=embed)
-		#popular vote 
-		else:
-			seen = set()			
-			for emote in msg.reactions:
-				async for user in emote.users():
-					seen.add(user)
 
-			print(len(seen))
-			if len(seen) >= 4 and "twitter.com" in msg.content:	
+		seen = set()			
+		for emote in msg.reactions:
+			async for user in emote.users():
+				seen.add(user)
+
+		print(len(seen))
+		if len(seen) >= 4 or payload.member.id == grandpapants:
+			with open('MuseumIDs.txt') as f:
+				lines = [line.rstrip() for line in f]
+			if "twitter.com" in msg.content:	
 				print("in twitter")	
-				with open('MuseumIDs.txt') as f:
-						lines = [line.rstrip() for line in f]
+			
 				if str(message_id) not in lines:
 					print("Image has been voted into the museum") 	
 					embed = msg.content
 					await client.get_channel(fanart_dest).send(embed)
 					with open('MuseumIDs.txt', "a") as f:
 						f.write(str(message_id)+"\n")		
-			elif len(seen) >= 4 and msg.embeds:
-				print("in embeds")				
-				with open('MuseumIDs.txt') as f:
-						lines = [line.rstrip() for line in f]
+			elif msg.embeds:
+				print("in embeds")	
+
 				if str(message_id) not in lines:
 					print("Image has been voted into the museum") 	
-					embed = msg.embeds[0]
-					await client.get_channel(fanart_dest).send(embed=embed)
+					for embed in msg.embeds:
+						await client.get_channel(fanart_dest).send(embed=embed)
 					with open('MuseumIDs.txt', "a") as f:
 						f.write(str(message_id)+"\n")
-			elif len(seen) >= 4 and msg.attachments:	
-				print("in attachments")			
-				with open('MuseumIDs.txt') as f:
-						lines = [line.rstrip() for line in f]
+			elif msg.attachments:	
+				print("in attachments")	
+
 				if str(message_id) not in lines:
-					print("Image has been voted into the museum") 	
-					embed = msg.attachments[0].url
-					await client.get_channel(fanart_dest).send(embed)
+					print("Image has been voted into the museum") 
+					for embed in msg.attachments:
+						await client.get_channel(fanart_dest).send(embed)
 					with open('MuseumIDs.txt', "a") as f:
 						f.write(str(message_id)+"\n")
 
@@ -241,9 +235,9 @@ async def on_message(message):
     	if len(message.content) != 0: 
     		await client.get_channel(leaks_discussion).send(message.content)
 
-    	if len(message.embeds) > 0: 
+    	if message.embeds: 
     		for e in message.embeds: 
-    			await client.get_channel(leaks_discussion).send(e)
+    			await client.get_channel(leaks_discussion).send(embed=e)    			
 
     	if len(message.attachments) > 0:
     		for a in message.attachments: 
