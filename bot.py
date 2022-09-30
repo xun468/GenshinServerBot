@@ -14,20 +14,32 @@ import spacy
 from datetime import datetime, timezone
 from dateutil import tz
 
+
+#DALLE
+from Classes import Dalle
+import asyncio
+import os
+from PIL import Image, ImageDraw, ImageFont
+from pathlib import Path
+from typing import Union
+from discord import Embed
+from discord.ext import commands
+import random
+
 nlp = spacy.load("en_core_web_sm")
 def is_image_url(url):
-    parsed = url.split(".")
-    ending = parsed[-1].lower()
+	parsed = url.split(".")
+	ending = parsed[-1].lower()
 
-    return True if ending == "jpg" or ending == "jpeg" or ending == "png" or ending == "gif" else False
+	return True if ending == "jpg" or ending == "jpeg" or ending == "png" or ending == "gif" else False
 
 class POSifiedText(markovify.NewlineText):
-    def word_split(self, sentence):
-        return ["::".join((word.orth_, word.pos_)) for word in nlp(sentence)]
+	def word_split(self, sentence):
+		return ["::".join((word.orth_, word.pos_)) for word in nlp(sentence)]
 
-    def word_join(self, words):
-        sentence = " ".join(word.split("::")[0] for word in words)
-        return sentence
+	def word_join(self, words):
+		sentence = " ".join(word.split("::")[0] for word in words)
+		return sentence
 
 intents = discord.Intents.all()
 client = commands.Bot(command_prefix="!")
@@ -56,6 +68,8 @@ leaks_discussion = 777083973984976946
 #Other channels 
 general = 763500030928879666
 news = 763499148867403816
+test_channel = 851544672672677958
+art_club = 1006585412246057141
 
 servers = {
 	EMOJIS[':red_square:']    : "NA",
@@ -91,6 +105,7 @@ vanity = {
 	EMOJIS[':bubble_tea:'] : 963088831429611560, 
 	"baalstare" : 963087112364765314,
 	EMOJIS[':snowflake:'] : 967189618606895184,
+	"paimonthonk" : 1020113142786822216,
 
 }
 
@@ -115,8 +130,69 @@ fanart_contest = {
 	"paimoncoinfancy" : 909273086354935820,
 }
 
+character_mats = {
+	"aloy" : "https://i.imgur.com/T2pkERV.png",
+	"ayato" : "https://i.imgur.com/eFrDmIc.png",
+	"diluc" : "https://i.imgur.com/cFQloF0.png",
+	"eula" : "https://i.imgur.com/1FjSdyA.png",
+	"gorou" : "https://i.imgur.com/vV9lvOm.png",
+	"heizou" : "https://i.imgur.com/x1hPQZy.png",
+	"hutao" : "https://i.imgur.com/bG39Jj9.png",
+	"venti" : "https://i.imgur.com/pXga83a.png",
+	"jean" : "https://i.imgur.com/hc5mQS7.png",
+	"sucrose" : "https://i.imgur.com/Fu2qHI6.png",
+	"ganyu" : "https://i.imgur.com/8a0ZSJG.png",
+	"qiqi" : "https://i.imgur.com/uM7vxGt.png",
+	"diona" : "https://i.imgur.com/i4R3lBA.png",
+	"kaeya" : "https://i.imgur.com/0JYTVnF.png", 
+	"chongyun" : "https://i.imgur.com/tXaLGMh.png",
+	"keqing" : "https://i.imgur.com/qAiud1h.png",
+	"beidou" : "https://i.imgur.com/NSq8GAJ.png",
+	"bennet" : "https://i.imgur.com/tvN41GB.png",
+	"razor" : "https://i.imgur.com/6LZCHjA.png",
+	"fischl" : "https://i.imgur.com/iIid4H5.png", 
+	"lisa" : "https://i.imgur.com/kwIWYTz.png",
+	"zhongli" : "https://i.imgur.com/CnRl3LG.png",
+	"albedo" : "https://i.imgur.com/FlRMKsG.png", 
+	"noelle" : "https://i.imgur.com/6iBTb30.png",
+	"ningguang" : "https://i.imgur.com/qe5PDXm.png", 
+	"cost" : "https://i.imgur.com/zb4er6T.png",
+	"ayaka" : "https://i.imgur.com/93JrAGO.png", 
+	"yoimiya" : "https://i.imgur.com/R3b7agm.png",
+	"xiangling" : "https://i.imgur.com/Gh0aURN.png", 
+	"sayu" : "https://i.imgur.com/KskBS5B.png",
+	"yelan" : "https://i.imgur.com/PlkH00I.png",
+	"kuki" : "https://i.imgur.com/Z00hQ6T.png",
+	"tighnari" : "https://i.imgur.com/qIc9p3F.png",
+	"collei" : "https://i.imgur.com/YE1MNkj.png",
+	"dori" : "https://i.imgur.com/Hbhjizg.png",
+	"cyno" : "https://i.imgur.com/qge1Uvj.png",
+	"nilou" : "https://i.imgur.com/RZi78Kt.png",
+	"candace" : "https://i.imgur.com/2LtXGzw.png",
+	"amber" : "https://i.imgur.com/xlV3TvA.png",
+	"xinyan" : "https://i.imgur.com/Tmk1j2y.png",
+	"childe" : "https://i.imgur.com/sK0o7uS.png", 
+	"tartaglia" : "https://i.imgur.com/sK0o7uS.png",
+	"mona" : "https://i.imgur.com/qCGHAgB.png",
+	"xingqiu" : "https://i.imgur.com/0m5bpHQ.png", 
+	"barbara" : "https://i.imgur.com/1VwhjpD.png",
+	"itto" : "https://i.imgur.com/ZkRJg2M.png",
+	"kazuha" : "https://i.imgur.com/LDzZ6iR.png",
+	"klee" : "https://i.imgur.com/A39GtMF.png", 
+	"kokomi" : "https://i.imgur.com/xtZqes4.png",
+	"raiden" : "https://i.imgur.com/mQb9t8L.png", 
+	"rosaria" : "https://i.imgur.com/4BScXnP.png",
+	"sara" : "https://i.imgur.com/qr5Stzm.png",
+	"shenhe" : "https://i.imgur.com/rbJ38Jn.png",
+	"thoma" : "https://i.imgur.com/zxwUBGr.png",
+	"xiao" : "https://i.imgur.com/cS6Ifxh.png",
+	"yae" : "https://i.imgur.com/fFaZJQs.png", 
+	"yanfei" : "https://i.imgur.com/g8BfStZ.png",
+	"yunjin" : "https://i.imgur.com/O1ZMdht.png",
+}
+
 with open('json_model.json', 'r') as outfile:
-    model_json = outfile.read()
+	model_json = outfile.read()
 text_model = POSifiedText.from_json(model_json)
 chat_count = 0 
 
@@ -316,26 +392,39 @@ async def on_raw_reaction_remove(payload):
 
 @client.event
 async def on_message(message):
-    channel = message.channel
-    await client.process_commands(message)
-    global chat_count
+	channel = message.channel
+	await client.process_commands(message)
+	global chat_count
 
-    if channel.id == leaks_channel:
-    	print("leak detected")
-    	await client.get_channel(leaks_discussion).send(message.content, tts=message.tts, files=[await attch.to_file() for attch in message.attachments])
-    if channel.id == general: 
-    	chat_count = chat_count + 1 
-    	if chat_count > 200: 
-    		await client.get_channel(general).send(text_model.make_sentence())
-    		chat_count = 0
-    if channel.id == news: 
-    	if len(message.content) == 12: 
-    		await client.get_channel(news).send("<https://genshin.hoyoverse.com/en/gift?code=" + message.content+">")
+	if channel.id == leaks_channel:
+		print("leak detected")
+		await client.get_channel(leaks_discussion).send(message.content, tts=message.tts, files=[await attch.to_file() for attch in message.attachments])
+	if channel.id == general: 
+		chat_count = chat_count + 1 
+		if chat_count > 200: 
+			query = text_model.make_sentence()
+			if random.randint(1,10) == 11:
+				ctx = client.get_channel(general)
+				await draw(ctx, query = query, override = True)
+			else:
+				await client.get_channel(general).send(query)
+			chat_count = 0
+	if channel.id == news: 
+		if len(message.content) == 12: 
+			await client.get_channel(news).send("<https://genshin.hoyoverse.com/en/gift?code=" + message.content+">")
+	if channel.id == test_channel:
+		pass
+
 
 
 @client.command()
 async def register(ctx, uid = None, server = None, wl = None):
-	sheet = gc.open_by_key('1E9KJhGEjgST2KdPBDy0UcO2KvYRq4YXjtTJmctCGvwQ').sheet1
+	try:
+		sheet = gc.open_by_key('1E9KJhGEjgST2KdPBDy0UcO2KvYRq4YXjtTJmctCGvwQ').sheet1
+	except :
+		await ctx.send("Connection to sheet lost, try again later")
+		return 
+
 	user = ctx.author  
 	#automatic 
 	if uid and len(uid) == 9 and uid.isnumeric(): 		
@@ -399,7 +488,12 @@ async def register(ctx, uid = None, server = None, wl = None):
 @client.command()
 async def goon(ctx, term = None):
 	print("goon")
-	sheet = gc.open_by_key('1E9KJhGEjgST2KdPBDy0UcO2KvYRq4YXjtTJmctCGvwQ').sheet1
+	try:
+		sheet = gc.open_by_key('1E9KJhGEjgST2KdPBDy0UcO2KvYRq4YXjtTJmctCGvwQ').sheet1
+	except :
+		await ctx.send("Connection to sheet lost, try again later")
+		return 
+
 	#get self
 	if term == None: 
 		user = str(ctx.author).lower()
@@ -440,7 +534,12 @@ async def goon(ctx, term = None):
 
 @client.command()
 async def unregister(ctx, uid = None):
-	sheet = gc.open_by_key('1E9KJhGEjgST2KdPBDy0UcO2KvYRq4YXjtTJmctCGvwQ').sheet1
+	try:
+		sheet = gc.open_by_key('1E9KJhGEjgST2KdPBDy0UcO2KvYRq4YXjtTJmctCGvwQ').sheet1
+	except :
+		await ctx.send("Connection to sheet lost, try again later")
+		return 
+
 	# if uid: 
 	# 	values = sheet.findall(uid)		
 	# else: 
@@ -461,35 +560,128 @@ async def aprilfools(ctx, term = None):
 			await client.get_channel(general).send(msg)
 		else: 
 			await client.get_channel(general).send(text_model.make_sentence())	
-	
+
+@client.command()
+async def generate(ctx, *, term = None):
+	if ctx.channel.id == 851544672672677958:
+		ctx = client.get_channel(general)		
+		if term:
+			query = term
+		else: 
+			query = random.choice(characters) + " from genshin impact"
+		await draw(ctx, query = query, override = True)
+
+def parse_date(date, hour):
+	now = datetime.now(timezone.utc)
+	combined = date + " " + hour
+	try:
+		return datetime.strptime(combined, '%Y/%m/%d %I%p')
+	except ValueError:
+		pass
+	try: 
+		return datetime.strptime(combined, '%Y/%m/%d %H:%M')
+	except ValueError: 
+		pass
+	try:
+		return datetime.strptime(str(now.year) + "/"  + combined, '%Y/%m/%d %I%p')
+	except ValueError:
+		return 0
+
 @client.command()
 async def time(ctx, date = None, hour = None):
 	message = ""
 	from_zone = tz.gettz("UTC+8")
 
 	if date == None:
-		message = "No date entered. Find out how long until a specific UTC+8 time! Format is something like 05/31 6AM"
-	else: 
-		try:
-			now = datetime.now(timezone.utc)
-
-			combined = str(now.year) + " " + date + " " + hour
-			target_date = datetime.strptime(combined, '%Y %m/%d %I%p')
-			target_date = target_date.replace(tzinfo=from_zone)
-			print(target_date)
-
-			td = target_date - datetime.now(timezone.utc)
-
-			print(td)
-
-			message = "Time until " + date + " " + hour + " UTC+8: " + str(td.days) + " days " + str(td.seconds//3600) + " hours " + str((td.seconds//60)%60) + " minutes"
-		except ValueError:
-			print(combined)
-			message = "Invalid date format, please use something like 05/31 6AM"
+		message = "No date entered. Find out how long until a specific UTC+8 time! Available formats are YYYY/MM/DD 06:00, YYYY/MM/DD 6AM, MM/DD 6AM (Copied from news posts)"
+	else:			
+		target_date = parse_date(date, hour)
+		if target_date != 0:
+			target_date = target_date.replace(tzinfo=from_zone)			
+			message = date + " " + hour + " UTC+8 is <t:"+str(int(target_date.timestamp()))+":R>"
+		else: 
+			message = "Invalid date, available formats are YYYY/MM/DD 06:00, YYYY/MM/DD 6AM, MM/DD 6AM. Bother Xun for more formats if you want"
+			
 
 	await ctx.send(message)
 
-		
+@client.command()
+async def shop(ctx):
+	await ctx.send("https://cdn.discordapp.com/attachments/763499290914979871/1013892054788608010/unknown.png")
+
+
+drawing_messages = [
+"Drawing...",
+"Hold on...",
+"Wait a moment..."
+]
+
+finished_messages = [
+"Behold!",
+"I have drawn", 
+"Here is"
+]
+
+#DALLE STUFF 
+@client.command()
+async def draw(ctx, *, query =  None, override = False):
+	print(query)
+	print(override)
+	if override or ctx.channel.id == art_club:
+		# Check if query is empty
+		if not query:
+			query = random.choice(characters) + " genshin impact"
+
+		# Check if query is too long
+		if len(query) > 100:
+			await ctx.send("Invalid query\nQuery is too long.")
+			return
+
+		print(f"[-] dalle was called with {query}")
+
+		message = await ctx.send(random.choice(drawing_messages))
+
+		try:
+			dall_e = await Dalle.DallE(prompt=f"{query}", author=f"Katheryne")
+			generated = await dall_e.generate()
+
+			if len(generated) > 0:			
+				first_image = Image.open(random.choice(generated).path)
+
+				i = 0
+				while os.path.exists("./generated/art%s.png" % i):
+				    i += 1
+
+				artname = "art" + str(i) + ".png"
+				first_image.save(f"./generated/" + artname)		
+
+				# Prepare the attachment
+				file = discord.File(f"./generated/" + artname, filename=artname)
+				message = await ctx.send(random.choice(finished_messages) + " " + query)
+				await ctx.send(file=file)
+
+
+		except Dalle.DallENoImagesReturned:
+			await ctx.send(f"Unable to draw {query}.")
+		except Dalle.DallENotJson:
+			await ctx.send("Serialization Error, please try again later.")
+		except Dalle.DallEParsingFailed:
+			await ctx.send("Parsing Error, please try again later.")
+		except Dalle.DallESiteUnavailable:
+			await ctx.message.send("Lost my pen, please try again later.")
+		except Exception as e:
+			await ctx.send("Nevermind, please try again later.")
+			print(repr(e))
+
+@client.command()
+async def mats(ctx, search):
+	print("search for " + search)
+	search = search.lower()
+	if search in character_mats.keys():
+		await ctx.send(character_mats[search])
+	else:
+		await ctx.send(search + " not found")
+
 # @loop(minutes=60.0)
 # async def countdown():
 # 	print("Checking banned list")
