@@ -189,11 +189,41 @@ character_mats = {
 	"yae" : "https://i.imgur.com/fFaZJQs.png", 
 	"yanfei" : "https://i.imgur.com/g8BfStZ.png",
 	"yunjin" : "https://i.imgur.com/O1ZMdht.png",
+	"layla" : "https://i.imgur.com/QPgoXvZ.png",
+	"nahida" : "https://i.imgur.com/HaBxyCE.png",
+	"faruzan" : "https://i.imgur.com/M3RD0OO.png",
+	"wanderer" : "https://i.imgur.com/cJPReaZ.png",
+	"scaramouche" : "https://i.imgur.com/cJPReaZ.png",
+	"alhaitham": "https://i.imgur.com/QtL94il.png",
+	"al" : "https://i.imgur.com/QtL94il.png",
+	"yaoyao" : "https://i.imgur.com/QS4I4dr.png",
+	"dehya" : "https://i.imgur.com/1uERidq.png",
+	"mika" : "https://cdn.discordapp.com/attachments/763503818306486292/1076989845177630791/image0.jpg",
+	"baizhu": "https://i.imgur.com/bMXyC2H.png",
+	"kaveh" : "https://i.imgur.com/5Fsm7PH.png",
+	"kirara" : "https://i.imgur.com/VoQmQEY.png",
+	
 }
+
+from collections import Counter
+
+talent_costs = [
+Counter({"Mora":0, "T1 books": 0, "T2 books": 0, "T3 books": 0, "T1 drops": 0, "T2 drops": 0,"T3 drops": 0, "Boss drops": 0}),
+Counter({"Mora":12500, "T1 books": 3, "T2 books": 0, "T3 books": 0, "T1 drops": 6, "T2 drops": 0,"T3 drops": 0, "Boss drops": 0}),
+Counter({"Mora":17500, "T1 books": 0, "T2 books": 2, "T3 books": 0, "T1 drops": 0, "T2 drops": 3,"T3 drops": 0, "Boss drops": 0}),
+Counter({"Mora":25000, "T1 books": 0, "T2 books": 4, "T3 books": 0, "T1 drops": 0, "T2 drops": 4,"T3 drops": 0, "Boss drops": 0}),
+Counter({"Mora":30000, "T1 books": 0, "T2 books": 6, "T3 books": 0, "T1 drops": 0, "T2 drops": 6,"T3 drops": 0, "Boss drops": 0}),
+Counter({"Mora":37500, "T1 books": 0, "T2 books": 9, "T3 books": 0, "T1 drops": 0, "T2 drops": 9,"T3 drops": 0, "Boss drops": 0}),
+Counter({"Mora":120000, "T1 books": 0, "T2 books": 0, "T3 books": 4, "T1 drops": 0, "T2 drops": 0,"T3 drops": 4, "Boss drops": 1}),
+Counter({"Mora":260000, "T1 books": 0, "T2 books": 0, "T3 books": 6, "T1 drops": 0, "T2 drops": 0,"T3 drops": 6, "Boss drops": 1}),
+Counter({"Mora":450000, "T1 books": 0, "T2 books": 0, "T3 books": 12, "T1 drops": 0, "T2 drops": 0,"T3 drops": 9, "Boss drops": 2}),
+Counter({"Mora":700000, "T1 books": 0, "T2 books": 0, "T3 books": 16, "T1 drops": 0, "T2 drops": 0,"T3 drops": 12, "Boss drops": 2}),
+]
 
 with open('json_model.json', 'r') as outfile:
 	model_json = outfile.read()
 text_model = POSifiedText.from_json(model_json)
+# text_model = markovify.Text.from_json(model_json)
 chat_count = 0 
 
 def get_server(name, guild):
@@ -415,10 +445,8 @@ async def on_message(message):
 	if channel.id == test_channel:
 		pass
 
-
-
-@client.command()
-async def register(ctx, uid = None, server = None, wl = None):
+@client.command(aliases=["register"])
+async def genshin(ctx, uid = None):
 	try:
 		sheet = gc.open_by_key('1E9KJhGEjgST2KdPBDy0UcO2KvYRq4YXjtTJmctCGvwQ').sheet1
 	except :
@@ -429,34 +457,14 @@ async def register(ctx, uid = None, server = None, wl = None):
 	#automatic 
 	if uid and len(uid) == 9 and uid.isnumeric(): 		
 		#get roles 
-		all_roles = [] 
-		if user.roles:
-			all_roles = set([i.name for i in user.roles])
-		print(str(user) + " registering with " + str(all_roles))
+		print(str(user) + " registering with " + str(uid))
 
 		user_s = str(user).lower()
-		nickname = user.display_name
-
-		server = list(all_roles.intersection(server_names))
-		if not server:
-			server = "Not Given"
-		else:
-			server = server[0]
-
-		wls = list(all_roles.intersection(WL_server))
-		wl = '0'
-		if not wls: 
-			wl = "Not given"
-		else: 
-			for r in wls: 
-				if(int(r[-1]) > int(wl)):
-					wl = r[-1]
-			if wl == '5': 
-				wl = "1-5"
+		nickname = user.display_name		
 	
 		#updating sheet
 		cells = sheet.findall(user_s)
-		values = [user_s, nickname, uid, server, wl]
+		values = [user_s, nickname, uid]
 		#new registration
 		if len(cells) == 0: 
 			sheet.append_row(values)
@@ -464,7 +472,7 @@ async def register(ctx, uid = None, server = None, wl = None):
 		#updating
 		else:
 			r = str(sheet.find(user_s).row)
-			cell_list = sheet.range('A'+r+":E"+r)
+			cell_list = sheet.range('A'+r+":C"+r)
 			for i, v in enumerate(values):
 				cell_list[i].value = v
 			sheet.update_cells(cell_list)
@@ -473,18 +481,48 @@ async def register(ctx, uid = None, server = None, wl = None):
 		await ctx.send("Registration failed, UID is not 9 digits")
 	else: 
 		await ctx.send("Registration failed, did not get UID")
-	# #manual 
-	# elif uid and len(uid) == 9 and server: 
-	# 	if not wl: 
-	# 		wl = "Not Given"
-	# 	cells = sheet.findall(str(uid))
-	# 	values = [str(user), uid, server, wl]
-	# 	if len(cells) == 0
-	# 		sheet.append_row(values)
-	# 	else: 
-	# 		r = str(sheet.find(str(uid)).row)
 
+@client.command()
+async def starrail(ctx, uid = None):
+	try:
+		sheet = gc.open_by_key('1E9KJhGEjgST2KdPBDy0UcO2KvYRq4YXjtTJmctCGvwQ').sheet1
+	except :
+		await ctx.send("Connection to sheet lost, try again later")
+		return 
 
+	user = ctx.author  
+	#automatic 
+	if uid and len(uid) == 9 and uid.isnumeric(): 		
+		#get roles 
+		print(str(user) + " registering with " + str(uid))
+
+		user_s = str(user).lower()
+		nickname = user.display_name		
+	
+		#updating sheet
+		cells = sheet.findall(user_s)
+		values = [user_s, nickname]
+		#new registration
+		if len(cells) == 0: 
+			values.append("")
+			values.append(uid)
+			sheet.append_row(values)
+			await ctx.send("Goon registered!")
+		#updating
+		else:
+			r = str(sheet.find(user_s).row)
+			cell_list = sheet.range('A'+r+":D"+r)
+			for i, v in enumerate(values):
+				cell_list[i].value = v
+			cell_list[3].value = uid
+			sheet.update_cells(cell_list)
+			await ctx.send("Goon updated!")
+	elif uid: 
+		await ctx.send("Registration failed, UID is not 9 digits")
+	else: 
+		await ctx.send("Registration failed, did not get UID")
+
+game_list = ["Genshin: ", "Star Rail: "]
 @client.command()
 async def goon(ctx, term = None):
 	print("goon")
@@ -498,12 +536,7 @@ async def goon(ctx, term = None):
 	if term == None: 
 		user = str(ctx.author).lower()
 		values = sheet.findall(user)
-		if len(values) > 0: 
-			for r in values:   
-				row_values = sheet.row_values(r.row)
-				row_values[1] = "\"" + row_values[1] + "\""
-				await ctx.send(', '.join(row_values))
-		else: 
+		if len(values) == 0:
 			await ctx.send("You have not registered yet, you can do so using !register <insert UID here>")
 	#search
 	else: 
@@ -520,17 +553,28 @@ async def goon(ctx, term = None):
 			print("nick search " + term)
 			nick_column = sheet.range("B1:B{}".format(sheet.row_count))
 			print(sheet.row_count)
-			values = [found for found in nick_column if term.lower() in found.value.lower()]				
+			values = [found for found in nick_column if term.lower() in found.value.lower()]
 
-		if len(values) > 0: 
-			print("goon found")
-			for r in values:   
-				row_values = sheet.row_values(r.row)
-				row_values[1] ="\"" + row_values[1] + "\""
-				await ctx.send(', '.join(row_values))
-		else: 
-			print("goon not found")
-			await ctx.send("Goon not found")
+			if len(values) == 0:
+				nick_column = sheet.range("A1:A{}".format(sheet.row_count))
+				values = [found for found in nick_column if term.lower() in found.value.lower()]		
+			
+	if len(values) > 0: 
+		print("goon found")
+		to_print = []
+		for r in values:   
+			row_values = sheet.row_values(r.row)
+			if term != None:
+				to_print = [row_values[0]]
+			row_values = row_values[2:]
+			for i, v in enumerate(row_values):
+				if v.strip():
+					to_print.append(game_list[i] + v)
+
+			await ctx.send(', '.join(to_print))
+	else: 
+		print("goon not found")
+		await ctx.send("Goon not found")
 
 @client.command()
 async def unregister(ctx, uid = None):
@@ -609,6 +653,44 @@ async def time(ctx, date = None, hour = None):
 async def shop(ctx):
 	await ctx.send("https://cdn.discordapp.com/attachments/763499290914979871/1013892054788608010/unknown.png")
 
+@client.command()
+async def books(ctx):
+	await ctx.send("https://i.imgur.com/UHUlxv2.png")
+
+@client.command()
+async def talents(ctx, start = None, end = None):
+	if start == None:
+		await ctx.send("https://i.imgur.com/He8yLVY.png")
+	else:
+		print_order = ["Mora", "T1 books", "T2 books", "T3 books", "T1 drops", "T2 drops","T3 drops", "Boss drops"]
+
+		try:
+			start = int(start)
+			end = int(end)
+		except:
+			await ctx.send("Input incorrectly formatted! Format should be !talents start end (eg. !talents 1 10)")
+			return
+
+		if start < 1 or end > 10: 
+			await ctx.send("Talent levels out of bounds")
+			return
+
+		final = talent_costs[0]
+		if start < end:
+			for i in range(start, end):
+				final = final + talent_costs[i]
+
+		output = "" 
+		for key in print_order:
+			if final[key] != 0: 
+				output = output + f'{final[key]:,}' + " " + key + " | "
+
+		if output == "":
+			await ctx.send("No mats needed")
+			return
+
+		await ctx.send(output[:len(output)-2])
+
 
 drawing_messages = [
 "Drawing...",
@@ -659,6 +741,7 @@ async def draw(ctx, *, query =  None, override = False):
 				file = discord.File(f"./generated/" + artname, filename=artname)
 				message = await ctx.send(random.choice(finished_messages) + " " + query)
 				await ctx.send(file=file)
+				os.remove(f"./generated/" + artname)
 
 
 		except Dalle.DallENoImagesReturned:
