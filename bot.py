@@ -13,7 +13,7 @@ import markovify
 import spacy
 from datetime import datetime, timezone
 from dateutil import tz
-
+from dicts import character_mats, vanity
 
 #DALLE
 from Classes import Dalle
@@ -65,11 +65,15 @@ housing_msg_id = 802955738267385906
 leaks_channel = 913137663400374312
 leaks_discussion = 777083973984976946
 
+sr_leaks_channel = 1209886429296201738
+sr_leaks_discussion = 1120836976283766801
+
 #Other channels 
 general = 763500030928879666
 news = 763499148867403816
 test_channel = 851544672672677958
 art_club = 1006585412246057141
+sr_news = 1116323672941137980
 
 servers = {
 	EMOJIS[':red_square:']    : "NA",
@@ -86,27 +90,6 @@ WL = {
 	EMOJIS[':six:']   : "6",
 	EMOJIS[':seven:'] : "7",
 	EMOJIS[':eight:'] : "8"
-}
-
-vanity = {
-	"warhams" : 795486023793639464,
-	"kaching" : 795486061509345290,
-	"toys"    : 795486103905763328,
-	"bennet"  : 795486180166336542,
-	"cocogoat": 795492459051614240,
-	"booze"   : 795493682031493132,
-	"allears" : 795793991684587600,
-	"thunk"   : 796365047604707388,
-	EMOJIS[':knife:']   : 806554181175214080,
-	"broke"   : 802948687508668456,
-	EMOJIS[':ghost:'] : 865381880232280065,
-	"vengeance" : 865381256027963433,
-	EMOJIS[':fox:'] : 963046824275492866,
-	EMOJIS[':bubble_tea:'] : 963088831429611560, 
-	"baalstare" : 963087112364765314,
-	EMOJIS[':snowflake:'] : 967189618606895184,
-	"paimonthonk" : 1020113142786822216,
-
 }
 
 pronouns = {
@@ -130,80 +113,6 @@ fanart_contest = {
 	"paimoncoinfancy" : 909273086354935820,
 }
 
-character_mats = {
-	"aloy" : "https://i.imgur.com/T2pkERV.png",
-	"ayato" : "https://i.imgur.com/eFrDmIc.png",
-	"diluc" : "https://i.imgur.com/cFQloF0.png",
-	"eula" : "https://i.imgur.com/1FjSdyA.png",
-	"gorou" : "https://i.imgur.com/vV9lvOm.png",
-	"heizou" : "https://i.imgur.com/x1hPQZy.png",
-	"hutao" : "https://i.imgur.com/bG39Jj9.png",
-	"venti" : "https://i.imgur.com/pXga83a.png",
-	"jean" : "https://i.imgur.com/hc5mQS7.png",
-	"sucrose" : "https://i.imgur.com/Fu2qHI6.png",
-	"ganyu" : "https://i.imgur.com/8a0ZSJG.png",
-	"qiqi" : "https://i.imgur.com/uM7vxGt.png",
-	"diona" : "https://i.imgur.com/i4R3lBA.png",
-	"kaeya" : "https://i.imgur.com/0JYTVnF.png", 
-	"chongyun" : "https://i.imgur.com/tXaLGMh.png",
-	"keqing" : "https://i.imgur.com/qAiud1h.png",
-	"beidou" : "https://i.imgur.com/NSq8GAJ.png",
-	"bennet" : "https://i.imgur.com/tvN41GB.png",
-	"razor" : "https://i.imgur.com/6LZCHjA.png",
-	"fischl" : "https://i.imgur.com/iIid4H5.png", 
-	"lisa" : "https://i.imgur.com/kwIWYTz.png",
-	"zhongli" : "https://i.imgur.com/CnRl3LG.png",
-	"albedo" : "https://i.imgur.com/FlRMKsG.png", 
-	"noelle" : "https://i.imgur.com/6iBTb30.png",
-	"ningguang" : "https://i.imgur.com/qe5PDXm.png", 
-	"cost" : "https://i.imgur.com/zb4er6T.png",
-	"ayaka" : "https://i.imgur.com/93JrAGO.png", 
-	"yoimiya" : "https://i.imgur.com/R3b7agm.png",
-	"xiangling" : "https://i.imgur.com/Gh0aURN.png", 
-	"sayu" : "https://i.imgur.com/KskBS5B.png",
-	"yelan" : "https://i.imgur.com/PlkH00I.png",
-	"kuki" : "https://i.imgur.com/Z00hQ6T.png",
-	"tighnari" : "https://i.imgur.com/qIc9p3F.png",
-	"collei" : "https://i.imgur.com/YE1MNkj.png",
-	"dori" : "https://i.imgur.com/Hbhjizg.png",
-	"cyno" : "https://i.imgur.com/qge1Uvj.png",
-	"nilou" : "https://i.imgur.com/RZi78Kt.png",
-	"candace" : "https://i.imgur.com/2LtXGzw.png",
-	"amber" : "https://i.imgur.com/xlV3TvA.png",
-	"xinyan" : "https://i.imgur.com/Tmk1j2y.png",
-	"childe" : "https://i.imgur.com/sK0o7uS.png", 
-	"tartaglia" : "https://i.imgur.com/sK0o7uS.png",
-	"mona" : "https://i.imgur.com/qCGHAgB.png",
-	"xingqiu" : "https://i.imgur.com/0m5bpHQ.png", 
-	"barbara" : "https://i.imgur.com/1VwhjpD.png",
-	"itto" : "https://i.imgur.com/ZkRJg2M.png",
-	"kazuha" : "https://i.imgur.com/LDzZ6iR.png",
-	"klee" : "https://i.imgur.com/A39GtMF.png", 
-	"kokomi" : "https://i.imgur.com/xtZqes4.png",
-	"raiden" : "https://i.imgur.com/mQb9t8L.png", 
-	"rosaria" : "https://i.imgur.com/4BScXnP.png",
-	"sara" : "https://i.imgur.com/qr5Stzm.png",
-	"shenhe" : "https://i.imgur.com/rbJ38Jn.png",
-	"thoma" : "https://i.imgur.com/zxwUBGr.png",
-	"xiao" : "https://i.imgur.com/cS6Ifxh.png",
-	"yae" : "https://i.imgur.com/fFaZJQs.png", 
-	"yanfei" : "https://i.imgur.com/g8BfStZ.png",
-	"yunjin" : "https://i.imgur.com/O1ZMdht.png",
-	"layla" : "https://i.imgur.com/QPgoXvZ.png",
-	"nahida" : "https://i.imgur.com/HaBxyCE.png",
-	"faruzan" : "https://i.imgur.com/M3RD0OO.png",
-	"wanderer" : "https://i.imgur.com/cJPReaZ.png",
-	"scaramouche" : "https://i.imgur.com/cJPReaZ.png",
-	"alhaitham": "https://i.imgur.com/QtL94il.png",
-	"al" : "https://i.imgur.com/QtL94il.png",
-	"yaoyao" : "https://i.imgur.com/QS4I4dr.png",
-	"dehya" : "https://i.imgur.com/1uERidq.png",
-	"mika" : "https://cdn.discordapp.com/attachments/763503818306486292/1076989845177630791/image0.jpg",
-	"baizhu": "https://i.imgur.com/bMXyC2H.png",
-	"kaveh" : "https://i.imgur.com/5Fsm7PH.png",
-	"kirara" : "https://i.imgur.com/VoQmQEY.png",
-	
-}
 
 from collections import Counter
 
@@ -429,6 +338,10 @@ async def on_message(message):
 	if channel.id == leaks_channel:
 		print("leak detected")
 		await client.get_channel(leaks_discussion).send(message.content, tts=message.tts, files=[await attch.to_file() for attch in message.attachments])
+	if channel.id == sr_leaks_channel:
+		print("sr leak detected")
+		await client.get_channel(sr_leaks_discussion).send(message.content, tts=message.tts, files=[await attch.to_file() for attch in message.attachments])
+		
 	if channel.id == general: 
 		chat_count = chat_count + 1 
 		if chat_count > 200: 
@@ -441,7 +354,10 @@ async def on_message(message):
 			chat_count = 0
 	if channel.id == news: 
 		if len(message.content) == 12: 
-			await client.get_channel(news).send("<https://genshin.hoyoverse.com/en/gift?code=" + message.content+">")
+			await client.get_channel(news).send("<https://genshin.hoyoverse.com/en/gift?code=" + message.content+">")	
+	if channel.id == sr_news: 
+		if len(message.content) == 12: 
+			await client.get_channel(sr_news).send("<https://hsr.hoyoverse.com/gift?code=" + message.content+">")	
 	if channel.id == test_channel:
 		pass
 
@@ -450,7 +366,7 @@ async def genshin(ctx, uid = None):
 	try:
 		sheet = gc.open_by_key('1E9KJhGEjgST2KdPBDy0UcO2KvYRq4YXjtTJmctCGvwQ').sheet1
 	except :
-		await ctx.send("Connection to sheet lost, try again later")
+		await ctx.send("Connection to sheet lost, try again")
 		return 
 
 	user = ctx.author  
@@ -460,18 +376,21 @@ async def genshin(ctx, uid = None):
 		print(str(user) + " registering with " + str(uid))
 
 		user_s = str(user).lower()
-		nickname = user.display_name		
+		nickname = user.nick	
+		discord_id = str(user.id)	
 	
 		#updating sheet
-		cells = sheet.findall(user_s)
+		cells = sheet.findall(discord_id)
 		values = [user_s, nickname, uid]
 		#new registration
 		if len(cells) == 0: 
+			values.append("")
+			values.append(discord_id)
 			sheet.append_row(values)
 			await ctx.send("Goon registered!")
 		#updating
 		else:
-			r = str(sheet.find(user_s).row)
+			r = str(sheet.find(discord_id).row)			
 			cell_list = sheet.range('A'+r+":C"+r)
 			for i, v in enumerate(values):
 				cell_list[i].value = v
@@ -487,7 +406,7 @@ async def starrail(ctx, uid = None):
 	try:
 		sheet = gc.open_by_key('1E9KJhGEjgST2KdPBDy0UcO2KvYRq4YXjtTJmctCGvwQ').sheet1
 	except :
-		await ctx.send("Connection to sheet lost, try again later")
+		await ctx.send("Connection to sheet lost, try again")
 		return 
 
 	user = ctx.author  
@@ -497,23 +416,28 @@ async def starrail(ctx, uid = None):
 		print(str(user) + " registering with " + str(uid))
 
 		user_s = str(user).lower()
-		nickname = user.display_name		
+		nickname = user.nick
+		discord_id = str(user.id)		
 	
 		#updating sheet
-		cells = sheet.findall(user_s)
+		cells = sheet.findall(discord_id)
 		values = [user_s, nickname]
 		#new registration
 		if len(cells) == 0: 
 			values.append("")
 			values.append(uid)
+			values.append(discord_id)
 			sheet.append_row(values)
 			await ctx.send("Goon registered!")
 		#updating
 		else:
-			r = str(sheet.find(user_s).row)
+			r = str(sheet.find(discord_id).row)
 			cell_list = sheet.range('A'+r+":D"+r)
 			for i, v in enumerate(values):
 				cell_list[i].value = v
+
+			cell_list[0].value = user_s
+			cell_list[1].value = nickname
 			cell_list[3].value = uid
 			sheet.update_cells(cell_list)
 			await ctx.send("Goon updated!")
@@ -529,36 +453,26 @@ async def goon(ctx, term = None):
 	try:
 		sheet = gc.open_by_key('1E9KJhGEjgST2KdPBDy0UcO2KvYRq4YXjtTJmctCGvwQ').sheet1
 	except :
-		await ctx.send("Connection to sheet lost, try again later")
+		await ctx.send("Connection to sheet lost, try again")
 		return 
 
 	#get self
 	if term == None: 
-		user = str(ctx.author).lower()
+		user = str(ctx.author.id)
 		values = sheet.findall(user)
 		if len(values) == 0:
 			await ctx.send("You have not registered yet, you can do so using !register <insert UID here>")
 	#search
 	else: 
-		#if user
-		if re.match(r"^.{3,32}#[0-9]{4}$", term):
-			print("regex match " + term)
-			values = sheet.findall(term.lower())	
 		#if UID		
-		elif len(term) == 9 and term.isnumeric():
+		if len(term) == 9 and term.isnumeric():
 			print("UID match " + term)
 			values = sheet.findall(term)
 		#nickname
 		else: 
 			print("nick search " + term)
-			nick_column = sheet.range("B1:B{}".format(sheet.row_count))
-			print(sheet.row_count)
-			values = [found for found in nick_column if term.lower() in found.value.lower()]
+			values = sheet.findall(term)
 
-			if len(values) == 0:
-				nick_column = sheet.range("A1:A{}".format(sheet.row_count))
-				values = [found for found in nick_column if term.lower() in found.value.lower()]		
-			
 	if len(values) > 0: 
 		print("goon found")
 		to_print = []
@@ -567,7 +481,7 @@ async def goon(ctx, term = None):
 			if term != None:
 				to_print = [row_values[0]]
 			row_values = row_values[2:]
-			for i, v in enumerate(row_values):
+			for i, v in enumerate(row_values[:-1]):
 				if v.strip():
 					to_print.append(game_list[i] + v)
 
@@ -654,8 +568,12 @@ async def shop(ctx):
 	await ctx.send("https://cdn.discordapp.com/attachments/763499290914979871/1013892054788608010/unknown.png")
 
 @client.command()
+async def srshop(ctx):
+	await ctx.send("https://cdn.discordapp.com/attachments/1099727180747001886/1155155520043356230/image.png")
+
+@client.command()
 async def books(ctx):
-	await ctx.send("https://i.imgur.com/UHUlxv2.png")
+	await ctx.send("https://cdn.discordapp.com/attachments/851544672672677958/1157661185781542982/Books.png")
 
 @client.command()
 async def talents(ctx, start = None, end = None):
