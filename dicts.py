@@ -92,6 +92,14 @@ character_mats = {
 	"sethos" : "https://cdn.discordapp.com/attachments/851544672672677958/1244317325998555291/sethos.png",
 	"clorinde" : "https://cdn.discordapp.com/attachments/851544672672677958/1244317149917614080/clorinde.png",
 	"sigewinne" : "https://cdn.discordapp.com/attachments/851544672672677958/1244317150198497280/sigewinne.png",
+	"emilie" : "https://cdn.discordapp.com/attachments/851544672672677958/1301475155909808168/image.png",
+	"mualani" : "https://cdn.discordapp.com/attachments/851544672672677958/1301483867894714421/image.png",
+	"mulani" : "https://cdn.discordapp.com/attachments/851544672672677958/1301483867894714421/image.png",
+	"kachina" : "https://cdn.discordapp.com/attachments/851544672672677958/1301483971527577631/image.png",
+	"kinich" : "https://cdn.discordapp.com/attachments/851544672672677958/1301484129799376906/image.png", 
+	"ororon" : "https://cdn.discordapp.com/attachments/851544672672677958/1301483731361468467/image.png", 
+	"chasca" : "https://cdn.discordapp.com/attachments/851544672672677958/1301483778106982492/image.png",
+
 }
 
 vanity = {
@@ -113,6 +121,9 @@ vanity = {
 	EMOJIS[':snowflake:'] : 967189618606895184,
 	"paimonthonk" : 1020113142786822216,
 	EMOJIS[':fish:'] : 1157657705461325855,
+	EMOJIS[':salt:'] : 1250500141782143130,
+	EMOJIS[':axe:'] : 1225934220011241592,
+	"yoiwow" : 1250559005127086090,
 
 
 }

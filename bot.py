@@ -89,7 +89,8 @@ WL = {
 	EMOJIS[':five:']  : "1-5",
 	EMOJIS[':six:']   : "6",
 	EMOJIS[':seven:'] : "7",
-	EMOJIS[':eight:'] : "8"
+	EMOJIS[':eight:'] : "8",
+	EMOJIS[':nine:'] : "9",
 }
 
 pronouns = {
@@ -573,7 +574,7 @@ async def srshop(ctx):
 
 @client.command()
 async def books(ctx):
-	await ctx.send("https://cdn.discordapp.com/attachments/851544672672677958/1157661185781542982/Books.png")
+	await ctx.send("https://cdn.discordapp.com/attachments/851544672672677958/1301488444501000234/g3.png")
 
 @client.command()
 async def talents(ctx, start = None, end = None):
