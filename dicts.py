@@ -99,6 +99,23 @@ character_mats = {
 	"kinich" : "https://cdn.discordapp.com/attachments/851544672672677958/1301484129799376906/image.png", 
 	"ororon" : "https://cdn.discordapp.com/attachments/851544672672677958/1301483731361468467/image.png", 
 	"chasca" : "https://cdn.discordapp.com/attachments/851544672672677958/1301483778106982492/image.png",
+	"lanyan" : "https://cdn.discordapp.com/attachments/851544672672677958/1324105219562274836/image.png",
+	"lan yan" : "https://cdn.discordapp.com/attachments/851544672672677958/1324105219562274836/image.png",
+	"mavuika" : "https://cdn.discordapp.com/attachments/851544672672677958/1324105286323011604/image.png",
+	"citlali" : "https://cdn.discordapp.com/attachments/851544672672677958/1324105352941142047/image.png", 
+	"mizuki" : "https://cdn.discordapp.com/attachments/851544672672677958/1324105711336292534/image.png",
+	"iansan" : "https://cdn.discordapp.com/attachments/851544672672677958/1339763015175770172/image.png",
+	"varesa" : "https://cdn.discordapp.com/attachments/851544672672677958/1339763385549590568/image.png",
+	"escoffier" : "https://cdn.discordapp.com/attachments/851544672672677958/1360284290247557240/image.png",
+	"coffee" : "https://cdn.discordapp.com/attachments/851544672672677958/1360284290247557240/image.png",
+	"ifa" : "https://cdn.discordapp.com/attachments/851544672672677958/1369306722560118815/ifa.png",
+	"skirk" : "https://cdn.discordapp.com/attachments/851544672672677958/1398609204473761846/image.png",
+	"dahlia" : "https://cdn.discordapp.com/attachments/851544672672677958/1398609204863959151/image.png",
+	"ineffa" : "https://cdn.discordapp.com/attachments/851544672672677958/1398608814198231052/image.png",
+	"aino" : "https://cdn.discordapp.com/attachments/851544672672677958/1412890279228477533/image.png",
+	"lauma" : "https://cdn.discordapp.com/attachments/851544672672677958/1412890496761725131/image.png",
+	"flins" : "https://cdn.discordapp.com/attachments/851544672672677958/1412890561614053396/image.png",
+	"nefer" : "https://cdn.discordapp.com/attachments/851544672672677958/1427762967490990150/image.png"
 
 }
 

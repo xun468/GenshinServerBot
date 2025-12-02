@@ -61,6 +61,8 @@ pronoun_msg_id = 795491652017979472
 command_msg_id = 807789677729808385
 housing_msg_id = 802955738267385906
 
+wwm_msg_id = 1445485785712431225
+
 #leaks channels 
 leaks_channel = 913137663400374312
 leaks_discussion = 777083973984976946
@@ -100,6 +102,12 @@ pronouns = {
 
 }
 
+wwm_roles = {
+	EMOJIS[':tada:'] : 1445485313496715334,
+	EMOJIS[':skull:'] : 1445485390327713993,
+	EMOJIS[':chart_with_upwards_trend:'] : 1445485403607138385
+}
+
 WLS = ["WL8", "WL7", "WL6", "WL5", "WL4", "WL3", "WL2", "WL1"]
 server_names = ["NA", "EU", "Asia"]
 WL_server = ["EU1-5", "EU6" ,"EU7",	"EU8",
@@ -136,7 +144,7 @@ text_model = POSifiedText.from_json(model_json)
 # text_model = markovify.Text.from_json(model_json)
 chat_count = 0 
 
-def get_server(name, guild):
+def get_server(name, member, guild):
 	if name in servers.keys():
 		return discord.utils.get(guild.roles,name=servers[name]), "server reaction" 	
 	return None, "invalid server reaction" 
@@ -152,12 +160,12 @@ def get_WL(name, member, guild):
 				return discord.utils.get(guild.roles,name=s), "WL reaction"			
 	return None, "invalid WL reaction"
 
-def get_vanity(name, guild):
+def get_vanity(name, member, guild):
 	if name in vanity.keys():
 		return discord.utils.get(guild.roles,id=vanity[name]), "vanity reaction"
 	return None, "invalid vanity reaction"
 
-def get_pronoun(name, guild):
+def get_pronoun(name, member, guild):
 	if name in pronouns.keys():
 		return discord.utils.get(guild.roles,id=pronouns[name]), "pronoun reaction"
 	return None, "invalid pronoun reaction"
@@ -168,13 +176,30 @@ def get_housing(name, member, guild):
 		for s in server_names: 
 			if s in roles: 
 				return discord.utils.get(guild.roles,name="Housing-"+s), "Housing reaction"	
-	return None, "invalid WL reaction"	
+
+	if (name == 'yae'):
+		return discord.utils.get(guild.roles,id=1320004775886065689), "code reaction"
+
+	if (name == EMOJIS[':railway_car:']):
+		return discord.utils.get(guild.roles,id=1320006801034580120), "code reaction"
+
+	return None, "invalid ping role reaction"	
+
+def get_wwm(name, member, guild):
+	if name in wwm_roles.keys():
+		return discord.utils.get(guild.roles,id=wwm_roles[name]), "wwm reaction"
+
+	return None, "invalid wwm reaction"
+
 	
 reaction_categories = {
 	sever_msg_id : get_server,
 	wl_msg_id : get_WL,
 	vanity_msg_id : get_vanity,
-	pronoun_msg_id : get_pronoun
+	pronoun_msg_id : get_pronoun,
+	housing_msg_id : get_housing,
+	wwm_msg_id : get_wwm
+
 }
 
 @client.event
@@ -185,7 +210,8 @@ async def on_ready():
 async def on_raw_reaction_add(payload): 
 	#Role Reacts 
 	message_id = payload.message_id
-	if message_id == sever_msg_id or wl_msg_id:
+	if message_id in reaction_categories.keys():
+		print("reaction message id")
 		guild_id = payload.guild_id
 		guild = discord.utils.find(lambda g : g.id == guild_id, client.guilds)
 		member = payload.member
@@ -193,15 +219,9 @@ async def on_raw_reaction_add(payload):
 		member_str = str(member) + " added "
 		category = "invalid post"
 		
-		if message_id == wl_msg_id: 
-			role, category = get_WL(payload.emoji.name, member, guild)
-			print(member_str + category)
-		elif message_id == housing_msg_id: 
-			role, category = get_housing(payload.emoji.name, member, guild)
-			print(member_str + category)
-		elif message_id in reaction_categories.keys():
-			role, category = reaction_categories[message_id](payload.emoji.name, guild)	
-			print(member_str + category)
+
+		role, category = reaction_categories[message_id](payload.emoji.name,member, guild)	
+		print(member_str + category)
 
 		if role is not None: 
 			if member is not None:
@@ -210,91 +230,92 @@ async def on_raw_reaction_add(payload):
 			else: 
 				print("member not found")
 
-	#Fanart Curation 
-	channel = payload.channel_id	
-	if channel == fanart_source:
-		message_id = payload.message_id
-		member_id = payload.member.id
-		msg = await client.get_channel(payload.channel_id).fetch_message(message_id)
 
-		seen = set()			
-		for emote in msg.reactions:
-			async for user in emote.users():
-				seen.add(user)
+	# #Fanart Curation 
+	# channel = payload.channel_id	
+	# if channel == fanart_source:
+	# 	message_id = payload.message_id
+	# 	member_id = payload.member.id
+	# 	msg = await client.get_channel(payload.channel_id).fetch_message(message_id)
 
-		print(len(seen))
-		if len(seen) >= 4 or member_id == grandpapants:
-			with open('MuseumIDs.txt') as f:
-				lines = [line.rstrip() for line in f]
+	# 	seen = set()			
+	# 	for emote in msg.reactions:
+	# 		async for user in emote.users():
+	# 			seen.add(user)
 
-			if str(message_id) not in lines:	
-				print("Image has been voted into the museum")
+	# 	print(len(seen))
+	# 	if len(seen) >= 4 or member_id == grandpapants:
+	# 		with open('MuseumIDs.txt') as f:
+	# 			lines = [line.rstrip() for line in f]
 
-				if "twitter.com" in msg.content:	
-					print("in twitter")									
-					embed = msg.content
-					await client.get_channel(fanart_dest).send(embed)
+	# 		if str(message_id) not in lines:	
+	# 			print("Image has been voted into the museum")
+
+	# 			if "twitter.com" in msg.content:	
+	# 				print("in twitter")									
+	# 				embed = msg.content
+	# 				await client.get_channel(fanart_dest).send(embed)
 					
-				elif is_image_url(msg.content):
-					print("is image link")
-					await client.get_channel(fanart_dest).send(msg.content)
+	# 			elif is_image_url(msg.content):
+	# 				print("is image link")
+	# 				await client.get_channel(fanart_dest).send(msg.content)
 
-				elif msg.embeds:
-					print("in embeds")	
-					for embed in msg.embeds:
-						await client.get_channel(fanart_dest).send(embed=embed)
+	# 			elif msg.embeds:
+	# 				print("in embeds")	
+	# 				for embed in msg.embeds:
+	# 					await client.get_channel(fanart_dest).send(embed=embed)
 					
-				elif msg.attachments:	
-					print("in attachments")
-					for embed in msg.attachments:
-						await client.get_channel(fanart_dest).send(embed)					
+	# 			elif msg.attachments:	
+	# 				print("in attachments")
+	# 				for embed in msg.attachments:
+	# 					await client.get_channel(fanart_dest).send(embed)					
 
-				with open('MuseumIDs.txt', "a") as f:
-						f.write(str(message_id)+"\n")
+	# 			with open('MuseumIDs.txt', "a") as f:
+	# 					f.write(str(message_id)+"\n")
 
 
-		#fanart contest		
-		if payload.emoji.name in fanart_contest.keys():
-			coin_name = payload.emoji.name
-			target_channel = fanart_contest[coin_name]
+	# 	#fanart contest		
+	# 	if payload.emoji.name in fanart_contest.keys():
+	# 		coin_name = payload.emoji.name
+	# 		target_channel = fanart_contest[coin_name]
 
-			filename = Path(coin_name + "-ImageIDs.txt")
-			filename.touch(exist_ok=True)
+	# 		filename = Path(coin_name + "-ImageIDs.txt")
+	# 		filename.touch(exist_ok=True)
 
-			filename = Path(coin_name + "-MemberIDs.txt")
-			filename.touch(exist_ok=True)
+	# 		filename = Path(coin_name + "-MemberIDs.txt")
+	# 		filename.touch(exist_ok=True)
 			
 
-			with open(coin_name + "-ImageIDs.txt") as f:
-				image_ids = [line.rstrip() for line in f]
-			with open(coin_name + "-MemberIDs.txt") as f:
-				user_ids = [line.rstrip() for line in f]
+	# 		with open(coin_name + "-ImageIDs.txt") as f:
+	# 			image_ids = [line.rstrip() for line in f]
+	# 		with open(coin_name + "-MemberIDs.txt") as f:
+	# 			user_ids = [line.rstrip() for line in f]
 
-			if str(message_id) not in image_ids and str(member_id) not in user_ids:
-				print(coin_name + " nomination has been made")
-				if "twitter.com" in msg.content:	
-					print("in twitter")									
-					embed = msg.content
-					new = await client.get_channel(target_channel).send(embed)
+	# 		if str(message_id) not in image_ids and str(member_id) not in user_ids:
+	# 			print(coin_name + " nomination has been made")
+	# 			if "twitter.com" in msg.content:	
+	# 				print("in twitter")									
+	# 				embed = msg.content
+	# 				new = await client.get_channel(target_channel).send(embed)
 					
-				elif is_image_url(msg.content):
-					print("is image link")
-					new = await client.get_channel(target_channel).send(msg.content)
+	# 			elif is_image_url(msg.content):
+	# 				print("is image link")
+	# 				new = await client.get_channel(target_channel).send(msg.content)
 
-				elif msg.embeds:
-					print("in embeds")			
-					new = await client.get_channel(target_channel).send(embed=msg.embeds[0])
+	# 			elif msg.embeds:
+	# 				print("in embeds")			
+	# 				new = await client.get_channel(target_channel).send(embed=msg.embeds[0])
 					
-				elif msg.attachments:	
-					print("in attachments")
-					new = await client.get_channel(target_channel).send(msg.attachments[0])	
+	# 			elif msg.attachments:	
+	# 				print("in attachments")
+	# 				new = await client.get_channel(target_channel).send(msg.attachments[0])	
 
-				await new.add_reaction("<:paimoncoin:922681177071034368>")				
+	# 			await new.add_reaction("<:paimoncoin:922681177071034368>")				
 
-				with open(coin_name + "-ImageIDs.txt", "a") as f:
-					f.write(str(message_id)+"\n")
-				with open(coin_name + "-MemberIDs.txt","a") as f:
-					f.write(str(member_id)+"\n")
+	# 			with open(coin_name + "-ImageIDs.txt", "a") as f:
+	# 				f.write(str(message_id)+"\n")
+	# 			with open(coin_name + "-MemberIDs.txt","a") as f:
+	# 				f.write(str(member_id)+"\n")
 				
 
 				
@@ -305,23 +326,16 @@ async def on_raw_reaction_add(payload):
 @client.event 
 async def on_raw_reaction_remove(payload): 
 	message_id = payload.message_id
-	if message_id == sever_msg_id or wl_msg_id:
+	if message_id in reaction_categories.keys():
 		guild = await client.fetch_guild(payload.guild_id)
 		member = await guild.fetch_member(payload.user_id)
 		role = None 
 		member_str = str(member) + " removed "
 		category = "invalid post"
 		
-		if message_id == wl_msg_id: 
-			role, category = get_WL(payload.emoji.name, member, guild)
-			print(member_str + category)
-		elif message_id == housing_msg_id: 
-			role, category = get_housing(payload.emoji.name, member, guild)
-			print(member_str + category)
-		elif message_id in reaction_categories.keys():
-			role, category = reaction_categories[message_id](payload.emoji.name, guild)	
-			print(member_str + category)
-			
+		role, category = reaction_categories[message_id](payload.emoji.name,member, guild)	
+		print(member_str + category)
+
 		if role is not None: 
 			if member is not None:
 				await member.remove_roles(role)
@@ -354,13 +368,13 @@ async def on_message(message):
 				await client.get_channel(general).send(query)
 			chat_count = 0
 	if channel.id == news: 
-		if len(message.content) == 12: 
-			await client.get_channel(news).send("<https://genshin.hoyoverse.com/en/gift?code=" + message.content+">")	
+		if message.content[0] == "!": 
+			await client.get_channel(news).send("<https://genshin.hoyoverse.com/en/gift?code=" + message.content[1:]+"> <@&1320004775886065689>")	
 	if channel.id == sr_news: 
-		if len(message.content) == 12: 
-			await client.get_channel(sr_news).send("<https://hsr.hoyoverse.com/gift?code=" + message.content+">")	
-	if channel.id == test_channel:
-		pass
+		if message.content[0] == "!": 
+			await client.get_channel(sr_news).send("<https://hsr.hoyoverse.com/gift?code=" + message.content[1:]+"> <@&1320006801034580120>")	
+	# if channel.id == test_channel:
+	# 	continue
 
 @client.command(aliases=["register"])
 async def genshin(ctx, uid = None):
@@ -462,7 +476,7 @@ async def goon(ctx, term = None):
 		user = str(ctx.author.id)
 		values = sheet.findall(user)
 		if len(values) == 0:
-			await ctx.send("You have not registered yet, you can do so using !register <insert UID here>")
+			await ctx.send("You have not registered yet, you can do so using !genshin or !starrail")
 	#search
 	else: 
 		#if UID		
@@ -574,7 +588,7 @@ async def srshop(ctx):
 
 @client.command()
 async def books(ctx):
-	await ctx.send("https://cdn.discordapp.com/attachments/851544672672677958/1301488444501000234/g3.png")
+	await ctx.send("https://cdn.discordapp.com/attachments/851544672672677958/1428714183452790854/Books.png")
 
 @client.command()
 async def talents(ctx, start = None, end = None):
