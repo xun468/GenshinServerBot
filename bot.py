@@ -6,13 +6,13 @@ from discord.ext.tasks import loop
 from discord.utils import get
 import gspread
 import re 
+import datetime as dt
 from datetime import datetime, timedelta
+from pytz import timezone 
 from pathlib import Path
 import pickle
 import markovify 
 import spacy
-from datetime import datetime, timezone
-from dateutil import tz
 from dicts import character_mats, vanity
 
 #DALLE
@@ -105,7 +105,8 @@ pronouns = {
 wwm_roles = {
 	EMOJIS[':tada:'] : 1445485313496715334,
 	EMOJIS[':skull:'] : 1445485390327713993,
-	EMOJIS[':chart_with_upwards_trend:'] : 1445485403607138385
+	EMOJIS[':chart_with_upwards_trend:'] : 1445485403607138385,
+	EMOJIS[':newspaper:'] : 1450909025201029362
 }
 
 WLS = ["WL8", "WL7", "WL6", "WL5", "WL4", "WL3", "WL2", "WL1"]
@@ -205,6 +206,7 @@ reaction_categories = {
 @client.event
 async def on_ready():
 	print("Katheryne Online") 
+	await daily_event_ping()
 
 @client.event 
 async def on_raw_reaction_add(payload): 
@@ -231,47 +233,47 @@ async def on_raw_reaction_add(payload):
 				print("member not found")
 
 
-	# #Fanart Curation 
-	# channel = payload.channel_id	
-	# if channel == fanart_source:
-	# 	message_id = payload.message_id
-	# 	member_id = payload.member.id
-	# 	msg = await client.get_channel(payload.channel_id).fetch_message(message_id)
+	#Fanart Curation 
+	channel = payload.channel_id	
+	if channel == fanart_source:
+		message_id = payload.message_id
+		member_id = payload.member.id
+		msg = await client.get_channel(payload.channel_id).fetch_message(message_id)
 
-	# 	seen = set()			
-	# 	for emote in msg.reactions:
-	# 		async for user in emote.users():
-	# 			seen.add(user)
+		seen = set()			
+		for emote in msg.reactions:
+			async for user in emote.users():
+				seen.add(user)
 
-	# 	print(len(seen))
-	# 	if len(seen) >= 4 or member_id == grandpapants:
-	# 		with open('MuseumIDs.txt') as f:
-	# 			lines = [line.rstrip() for line in f]
+		print(len(seen))
+		if len(seen) >= 4 or member_id == grandpapants:
+			with open('MuseumIDs.txt') as f:
+				lines = [line.rstrip() for line in f]
 
-	# 		if str(message_id) not in lines:	
-	# 			print("Image has been voted into the museum")
+			if str(message_id) not in lines:	
+				print("Image has been voted into the museum")
 
-	# 			if "twitter.com" in msg.content:	
-	# 				print("in twitter")									
-	# 				embed = msg.content
-	# 				await client.get_channel(fanart_dest).send(embed)
+				if "twitter.com" in msg.content or "x.com" in msg.content:	
+					print("in twitter")									
+					embed = msg.content
+					await client.get_channel(fanart_dest).send(embed)
 					
-	# 			elif is_image_url(msg.content):
-	# 				print("is image link")
-	# 				await client.get_channel(fanart_dest).send(msg.content)
+				elif is_image_url(msg.content):
+					print("is image link")
+					await client.get_channel(fanart_dest).send(msg.content)
 
-	# 			elif msg.embeds:
-	# 				print("in embeds")	
-	# 				for embed in msg.embeds:
-	# 					await client.get_channel(fanart_dest).send(embed=embed)
+				elif msg.embeds:
+					print("in embeds")	
+					for embed in msg.embeds:
+						await client.get_channel(fanart_dest).send(embed=embed)
 					
-	# 			elif msg.attachments:	
-	# 				print("in attachments")
-	# 				for embed in msg.attachments:
-	# 					await client.get_channel(fanart_dest).send(embed)					
+				elif msg.attachments:	
+					print("in attachments")
+					for embed in msg.attachments:
+						await client.get_channel(fanart_dest).send(embed)					
 
-	# 			with open('MuseumIDs.txt', "a") as f:
-	# 					f.write(str(message_id)+"\n")
+				with open('MuseumIDs.txt', "a") as f:
+						f.write(str(message_id)+"\n")
 
 
 	# 	#fanart contest		
@@ -545,7 +547,7 @@ async def generate(ctx, *, term = None):
 		await draw(ctx, query = query, override = True)
 
 def parse_date(date, hour):
-	now = datetime.now(timezone.utc)
+	now = datetime.now(timezone("UTC"))
 	combined = date + " " + hour
 	try:
 		return datetime.strptime(combined, '%Y/%m/%d %I%p')
@@ -563,7 +565,7 @@ def parse_date(date, hour):
 @client.command()
 async def time(ctx, date = None, hour = None):
 	message = ""
-	from_zone = tz.gettz("UTC+8")
+	from_zone = timezone("PRC")
 
 	if date == None:
 		message = "No date entered. Find out how long until a specific UTC+8 time! Available formats are YYYY/MM/DD 06:00, YYYY/MM/DD 6AM, MM/DD 6AM (Copied from news posts)"
@@ -624,71 +626,6 @@ async def talents(ctx, start = None, end = None):
 
 		await ctx.send(output[:len(output)-2])
 
-
-drawing_messages = [
-"Drawing...",
-"Hold on...",
-"Wait a moment..."
-]
-
-finished_messages = [
-"Behold!",
-"I have drawn", 
-"Here is"
-]
-
-#DALLE STUFF 
-@client.command()
-async def draw(ctx, *, query =  None, override = False):
-	print(query)
-	print(override)
-	if override or ctx.channel.id == art_club:
-		# Check if query is empty
-		if not query:
-			query = random.choice(characters) + " genshin impact"
-
-		# Check if query is too long
-		if len(query) > 100:
-			await ctx.send("Invalid query\nQuery is too long.")
-			return
-
-		print(f"[-] dalle was called with {query}")
-
-		message = await ctx.send(random.choice(drawing_messages))
-
-		try:
-			dall_e = await Dalle.DallE(prompt=f"{query}", author=f"Katheryne")
-			generated = await dall_e.generate()
-
-			if len(generated) > 0:			
-				first_image = Image.open(random.choice(generated).path)
-
-				i = 0
-				while os.path.exists("./generated/art%s.png" % i):
-				    i += 1
-
-				artname = "art" + str(i) + ".png"
-				first_image.save(f"./generated/" + artname)		
-
-				# Prepare the attachment
-				file = discord.File(f"./generated/" + artname, filename=artname)
-				message = await ctx.send(random.choice(finished_messages) + " " + query)
-				await ctx.send(file=file)
-				os.remove(f"./generated/" + artname)
-
-
-		except Dalle.DallENoImagesReturned:
-			await ctx.send(f"Unable to draw {query}.")
-		except Dalle.DallENotJson:
-			await ctx.send("Serialization Error, please try again later.")
-		except Dalle.DallEParsingFailed:
-			await ctx.send("Parsing Error, please try again later.")
-		except Dalle.DallESiteUnavailable:
-			await ctx.message.send("Lost my pen, please try again later.")
-		except Exception as e:
-			await ctx.send("Nevermind, please try again later.")
-			print(repr(e))
-
 @client.command()
 async def mats(ctx, search):
 	print("search for " + search)
@@ -697,6 +634,101 @@ async def mats(ctx, search):
 		await ctx.send(character_mats[search])
 	else:
 		await ctx.send(search + " not found")
+
+wwm_schedule = {
+	0 : "",
+	1 : "Breaking Army",
+	2 : "Showdown",
+	3 : "",
+	4 : "Breaking Army",
+	5 : "Showdown and Guild War",
+	6 : "Guild War", 
+}
+
+async def daily_event_ping():
+	while True:
+		now = datetime.now(timezone('EST'))
+		event_time = now.replace(hour = 20, minute=50)
+
+		while event_time <= now: 
+			event_time += dt.timedelta(days=1)
+
+		wait = (event_time - now).total_seconds()
+		await asyncio.sleep(wait)
+		
+		message = "Guild Party in 10 minutes"
+		if wwm_schedule[event_time.weekday()] != "":
+			message += " followed by " + wwm_schedule[event_time.weekday()]
+
+		channel = client.get_channel()
+		await channel.send(message)
+
+
+
+# #DALLE STUFF 
+
+# drawing_messages = [
+# "Drawing...",
+# "Hold on...",
+# "Wait a moment..."
+# ]
+
+# finished_messages = [
+# "Behold!",
+# "I have drawn", 
+# "Here is"
+# ]
+
+# @client.command()
+# async def draw(ctx, *, query =  None, override = False):
+# 	print(query)
+# 	print(override)
+# 	if override or ctx.channel.id == art_club:
+# 		# Check if query is empty
+# 		if not query:
+# 			query = random.choice(characters) + " genshin impact"
+
+# 		# Check if query is too long
+# 		if len(query) > 100:
+# 			await ctx.send("Invalid query\nQuery is too long.")
+# 			return
+
+# 		print(f"[-] dalle was called with {query}")
+
+# 		message = await ctx.send(random.choice(drawing_messages))
+
+# 		try:
+# 			dall_e = await Dalle.DallE(prompt=f"{query}", author=f"Katheryne")
+# 			generated = await dall_e.generate()
+
+# 			if len(generated) > 0:			
+# 				first_image = Image.open(random.choice(generated).path)
+
+# 				i = 0
+# 				while os.path.exists("./generated/art%s.png" % i):
+# 				    i += 1
+
+# 				artname = "art" + str(i) + ".png"
+# 				first_image.save(f"./generated/" + artname)		
+
+# 				# Prepare the attachment
+# 				file = discord.File(f"./generated/" + artname, filename=artname)
+# 				message = await ctx.send(random.choice(finished_messages) + " " + query)
+# 				await ctx.send(file=file)
+# 				os.remove(f"./generated/" + artname)
+
+
+# 		except Dalle.DallENoImagesReturned:
+# 			await ctx.send(f"Unable to draw {query}.")
+# 		except Dalle.DallENotJson:
+# 			await ctx.send("Serialization Error, please try again later.")
+# 		except Dalle.DallEParsingFailed:
+# 			await ctx.send("Parsing Error, please try again later.")
+# 		except Dalle.DallESiteUnavailable:
+# 			await ctx.message.send("Lost my pen, please try again later.")
+# 		except Exception as e:
+# 			await ctx.send("Nevermind, please try again later.")
+# 			print(repr(e))
 
 # @loop(minutes=60.0)
 # async def countdown():
