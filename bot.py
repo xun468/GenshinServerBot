@@ -13,7 +13,10 @@ from pathlib import Path
 import pickle
 import markovify 
 import spacy
-from dicts import character_mats, vanity
+from dicts import vanity
+import yaml 
+import io
+from emoji.unicode_codes import EMOJI_ALIAS_UNICODE_ENGLISH as EMOJIS 
 
 #DALLE
 from Classes import Dalle
@@ -106,7 +109,8 @@ wwm_roles = {
 	EMOJIS[':tada:'] : 1445485313496715334,
 	EMOJIS[':skull:'] : 1445485390327713993,
 	EMOJIS[':chart_with_upwards_trend:'] : 1445485403607138385,
-	EMOJIS[':newspaper:'] : 1450909025201029362
+	EMOJIS[':newspaper:'] : 1450909025201029362,
+	EMOJIS[':crossed_swords:'] : 1469900135407288411,
 }
 
 WLS = ["WL8", "WL7", "WL6", "WL5", "WL4", "WL3", "WL2", "WL1"]
@@ -138,6 +142,32 @@ Counter({"Mora":260000, "T1 books": 0, "T2 books": 0, "T3 books": 6, "T1 drops":
 Counter({"Mora":450000, "T1 books": 0, "T2 books": 0, "T3 books": 12, "T1 drops": 0, "T2 drops": 0,"T3 drops": 9, "Boss drops": 2}),
 Counter({"Mora":700000, "T1 books": 0, "T2 books": 0, "T3 books": 16, "T1 drops": 0, "T2 drops": 0,"T3 drops": 12, "Boss drops": 2}),
 ]
+
+vanity = {
+	"warhams" : 795486023793639464,
+	"kaching" : 795486061509345290,
+	"toys"    : 795486103905763328,
+	"bennet"  : 795486180166336542,
+	"cocogoat": 795492459051614240,
+	"booze"   : 795493682031493132,
+	"allears" : 795793991684587600,
+	"thunk"   : 796365047604707388,
+	EMOJIS[':knife:']   : 806554181175214080,
+	"broke"   : 802948687508668456,
+	EMOJIS[':ghost:'] : 865381880232280065,
+	"vengeance" : 865381256027963433,
+	EMOJIS[':fox:'] : 963046824275492866,
+	EMOJIS[':bubble_tea:'] : 963088831429611560, 
+	"baalstare" : 963087112364765314,
+	EMOJIS[':snowflake:'] : 967189618606895184,
+	"paimonthonk" : 1020113142786822216,
+	EMOJIS[':fish:'] : 1157657705461325855,
+	EMOJIS[':salt:'] : 1250500141782143130,
+	EMOJIS[':axe:'] : 1225934220011241592,
+	"yoiwow" : 1250559005127086090,
+
+
+}
 
 with open('json_model.json', 'r') as outfile:
 	model_json = outfile.read()
@@ -206,7 +236,7 @@ reaction_categories = {
 @client.event
 async def on_ready():
 	print("Katheryne Online") 
-	await daily_event_ping()
+	# await daily_event_ping()
 
 @client.event 
 async def on_raw_reaction_add(payload): 
@@ -630,6 +660,10 @@ async def talents(ctx, start = None, end = None):
 async def mats(ctx, search):
 	print("search for " + search)
 	search = search.lower()
+
+	with open("character_mats.yaml", 'r') as stream:
+    	character_mats = yaml.safe_load(stream)
+
 	if search in character_mats.keys():
 		await ctx.send(character_mats[search])
 	else:
@@ -647,20 +681,21 @@ wwm_schedule = {
 
 async def daily_event_ping():
 	while True:
-		now = datetime.now(timezone('EST'))
+		now = datetime.now(timezone('America/New_York'))
 		event_time = now.replace(hour = 20, minute=50)
 
 		while event_time <= now: 
 			event_time += dt.timedelta(days=1)
 
 		wait = (event_time - now).total_seconds()
+		print("sleeping for " + str(event_time - now).split('.',2)[0])
 		await asyncio.sleep(wait)
 		
-		message = "Guild Party in 10 minutes"
+		message = "<@&1445485313496715334> Guild Party in 10 minutes"
 		if wwm_schedule[event_time.weekday()] != "":
 			message += " followed by " + wwm_schedule[event_time.weekday()]
 
-		channel = client.get_channel()
+		channel = client.get_channel(1442255418939277343)
 		await channel.send(message)
 
 
