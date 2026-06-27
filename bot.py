@@ -662,7 +662,7 @@ async def mats(ctx, search):
 	search = search.lower()
 
 	with open("character_mats.yaml", 'r') as stream:
-    	character_mats = yaml.safe_load(stream)
+		character_mats = yaml.safe_load(stream)
 
 	if search in character_mats.keys():
 		await ctx.send(character_mats[search])
